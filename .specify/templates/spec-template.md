@@ -122,7 +122,8 @@
   chosen when the feature description did not specify certain details.
 -->
 
-- [Assumption about target users, e.g., "Users have stable internet connectivity"]
-- [Assumption about scope boundaries, e.g., "Mobile support is out of scope for v1"]
-- [Assumption about data/environment, e.g., "Existing authentication system will be reused"]
-- [Dependency on existing system/service, e.g., "Requires access to the existing user profile API"]
+- [MANDATORY SCOPE DISCIPLINE: No user accounts, no remote sync, no social features for MVP]
+- [MANDATORY SCIENTIFIC HONESTY: Evidence of cognitive transfer must be cited for every game]
+- [Assumption about target users: 25-35, tech-savvy, skeptic of pseudoscience]
+- [Dependency on local-first architecture for all data persistence]
+

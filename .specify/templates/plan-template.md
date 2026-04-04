@@ -17,15 +17,16 @@
   the iteration process.
 -->
 
-**Language/Version**: [e.g., Python 3.11, Swift 5.9, Rust 1.75 or NEEDS CLARIFICATION]  
-**Primary Dependencies**: [e.g., FastAPI, UIKit, LLVM or NEEDS CLARIFICATION]  
-**Storage**: [if applicable, e.g., PostgreSQL, CoreData, files or N/A]  
-**Testing**: [e.g., pytest, XCTest, cargo test or NEEDS CLARIFICATION]  
-**Target Platform**: [e.g., Linux server, iOS 15+, WASM or NEEDS CLARIFICATION]
-**Project Type**: [e.g., library/cli/web-service/mobile-app/compiler/desktop-app or NEEDS CLARIFICATION]  
-**Performance Goals**: [domain-specific, e.g., 1000 req/s, 10k lines/sec, 60 fps or NEEDS CLARIFICATION]  
-**Constraints**: [domain-specific, e.g., <200ms p95, <100MB memory, offline-capable or NEEDS CLARIFICATION]  
-**Scale/Scope**: [domain-specific, e.g., 10k users, 1M LOC, 50 screens or NEEDS CLARIFICATION]
+**Language/Version**: [e.g., HTML/JS, Vite/React, NEEDS CLARIFICATION]  
+**Primary Dependencies**: [e.g., localforage, Chart.js, NEEDS CLARIFICATION]  
+**Storage**: [MANDATORY: On-device only (localStorage/IndexedDB), no remote sync for MVP]  
+**Testing**: [e.g., Vitest, Playwright, NEEDS CLARIFICATION]  
+**Target Platform**: [e.g., Modern Browsers, Mobile Web/PWA, offline-first]
+**Project Type**: [MANDATORY: Open Source, web-app/PWA]  
+**Performance Goals**: [e.g., instantaneous load, 60fps animations]  
+**Constraints**: [MANDATORY: Offline-only, Privacy-first (no data collection), Scientific evidence for games]  
+**Scale/Scope**: [MANDATORY: MVP limited to 3 games (Flanker, Task Switching, Spatial Span)]
+
 
 ## Constitution Check
 
