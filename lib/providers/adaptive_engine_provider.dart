@@ -67,3 +67,12 @@ class AdaptiveEngineNotifier extends StateNotifier<AdaptiveDifficultyState> {
     );
   }
 }
+
+final difficultyRepositoryProvider = Provider<IDifficultyRepository>((ref) {
+  throw UnimplementedError('Initialize in main.dart');
+});
+
+final adaptiveEngineProvider = StateNotifierProvider<AdaptiveEngineNotifier, AdaptiveDifficultyState>((ref) {
+  final repo = ref.watch(difficultyRepositoryProvider);
+  return AdaptiveEngineNotifier(repo);
+});
