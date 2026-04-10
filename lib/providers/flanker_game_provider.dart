@@ -51,11 +51,30 @@ class FlankerGameNotifier extends StateNotifier<FlankerSessionState> {
     6: 700, 7: 600, 8: 500, 9: 450, 10: 400,
   };
 
+  /// Duration of correct/wrong feedback flash (ms)
+  static const _feedbackDurationMs = 200;
+
+  /// Duration of the top-down "reset" phase between trials (ms).
+  static const _resetDurationMs = 500;
+
+  /// Duration of the initial pre-trial top-down hold (ms)
+  static const _preTrialHoldMs = 800;
+
   void startSession(int initialLevel) {
     _sessionStartTime = DateTime.now();
     _initialLevel = initialLevel;
-    state = const FlankerSessionState(trialsRemaining: 75);
-    _nextTrial(initialLevel);
+    _adaptiveEngine.reset(initialLevel);
+
+    // Start with all fish in top-down state before the first trial
+    state = const FlankerSessionState(
+      trialsRemaining: 75,
+      isPreTrial: true,
+    );
+
+    // Hold in top-down for a moment, then begin the first trial
+    Future.delayed(const Duration(milliseconds: _preTrialHoldMs), () {
+      if (mounted) _nextTrial(initialLevel);
+    });
   }
 
   void _nextTrial(int level) {
@@ -70,6 +89,9 @@ class FlankerGameNotifier extends StateNotifier<FlankerSessionState> {
       currentStimulus: stimulus,
       isStimulusActive: true,
       feedbackState: FeedbackType.none,
+      isPreTrial: false,
+      isResetting: false,
+      isWaitingForContinue: false,
     );
 
     _stopwatch.reset();
@@ -77,22 +99,23 @@ class FlankerGameNotifier extends StateNotifier<FlankerSessionState> {
 
     _timeoutTimer?.cancel();
     _timeoutTimer = Timer(const Duration(milliseconds: 2000), () {
-      _handleResponse(null);
+      _handleTimeout();
     });
   }
 
   void reportResponse(Side side) {
     if (!state.isStimulusActive) return;
-    _handleResponse(side);
+    _handleTapResponse(side);
   }
 
-  void _handleResponse(Side? side) {
+  /// Called when the player taps during an active trial.
+  void _handleTapResponse(Side side) {
     _timeoutTimer?.cancel();
     _stopwatch.stop();
 
     final reactionTime = _stopwatch.elapsedMilliseconds;
     final stimulus = state.currentStimulus;
-    final isCorrect = side != null && side == stimulus?.targetDirection;
+    final isCorrect = side == stimulus?.targetDirection;
 
     _adaptiveEngine.reportTrial(isCorrect);
     final nextLevel = _adaptiveEngine.state.currentLevel;
@@ -104,17 +127,80 @@ class FlankerGameNotifier extends StateNotifier<FlankerSessionState> {
       'type': stimulus != null ? (stimulus.isCongruent ? 'congruent' : 'incongruent') : 'unknown',
     };
 
+    // Flash feedback for 200ms
     state = state.copyWith(
       isStimulusActive: false,
-      feedbackState: isCorrect 
-          ? FeedbackType.success 
-          : (side == null ? FeedbackType.timeout : FeedbackType.fail),
+      feedbackState: isCorrect ? FeedbackType.success : FeedbackType.fail,
       trialsRemaining: state.trialsRemaining - 1,
       bufferedTrials: [...state.bufferedTrials, trialData],
     );
 
-    final delay = _isiMap[nextLevel] ?? 800;
-    Future.delayed(Duration(milliseconds: delay), () {
+    // After the 200ms feedback flash, transition to top-down reset
+    Future.delayed(const Duration(milliseconds: _feedbackDurationMs), () {
+      if (!mounted) return;
+
+      final totalIsi = _isiMap[nextLevel] ?? 800;
+      final remainingReset = (totalIsi - _feedbackDurationMs).clamp(_resetDurationMs, totalIsi);
+
+      state = state.copyWith(
+        feedbackState: FeedbackType.none,
+        isResetting: true,
+        resetDurationMs: remainingReset,
+      );
+
+      Future.delayed(Duration(milliseconds: remainingReset), () {
+        if (mounted) _nextTrial(nextLevel);
+      });
+    });
+  }
+
+  /// Called when the 2000ms timeout fires — no player input.
+  /// Records trial as incorrect, dims the fish, and waits for a continue tap.
+  void _handleTimeout() {
+    _stopwatch.stop();
+
+    final reactionTime = _stopwatch.elapsedMilliseconds;
+    final stimulus = state.currentStimulus;
+
+    _adaptiveEngine.reportTrial(false);
+    final nextLevel = _adaptiveEngine.state.currentLevel;
+
+    final trialData = {
+      'rt': reactionTime,
+      'correct': false,
+      'level': nextLevel,
+      'type': stimulus != null ? (stimulus.isCongruent ? 'congruent' : 'incongruent') : 'unknown',
+    };
+
+    // Dim the fish and hold — wait for player to tap
+    state = state.copyWith(
+      isStimulusActive: false,
+      feedbackState: FeedbackType.timeout,
+      trialsRemaining: state.trialsRemaining - 1,
+      bufferedTrials: [...state.bufferedTrials, trialData],
+      isWaitingForContinue: true,
+    );
+  }
+
+  /// Called when the player taps during a timeout-hold.
+  /// This is NOT a trial response — just a continue signal.
+  void continueAfterTimeout() {
+    if (!state.isWaitingForContinue) return;
+
+    final nextLevel = _adaptiveEngine.state.currentLevel;
+
+    final totalIsi = _isiMap[nextLevel] ?? 800;
+    final resetDuration = totalIsi.clamp(_resetDurationMs, totalIsi);
+
+    // Transition to top-down reset, then next trial
+    state = state.copyWith(
+      feedbackState: FeedbackType.none,
+      isWaitingForContinue: false,
+      isResetting: true,
+      resetDurationMs: resetDuration,
+    );
+
+    Future.delayed(Duration(milliseconds: resetDuration), () {
       if (mounted) _nextTrial(nextLevel);
     });
   }
@@ -129,7 +215,7 @@ class FlankerGameNotifier extends StateNotifier<FlankerSessionState> {
       endedAt: DateTime.now(),
       startingLevel: _initialLevel,
       endingLevel: _adaptiveEngine.state.currentLevel,
-      environmentTier: 1, // Default for Flanker
+      environmentTier: 1,
     ));
 
     for (var i = 0; i < state.bufferedTrials.length; i++) {
@@ -145,8 +231,6 @@ class FlankerGameNotifier extends StateNotifier<FlankerSessionState> {
       ));
     }
     
-    // Level persistence is handled at game engine boundaries (spec 002)
-    // but the session persistence makes the current level available for next session.
     state = state.copyWith(isSessionComplete: true);
   }
 

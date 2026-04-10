@@ -6,6 +6,7 @@ import 'providers/flanker_game_provider.dart';
 import 'repositories/drift_difficulty_repository.dart';
 import 'repositories/drift_session_repository.dart';
 import 'repositories/drift_trial_repository.dart';
+import 'package:hebbo/screens/flanker_game_screen.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -41,11 +42,7 @@ class HebboApp extends StatelessWidget {
         ),
         useMaterial3: true,
       ),
-      home: const Scaffold(
-        body: Center(
-          child: Text('Hebbo: Brain Training App (Foundation)'),
-        ),
-      ),
+      home: const FlankerGameScreen(),
     );
   }
 }
