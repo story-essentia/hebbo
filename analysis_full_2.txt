@@ -1,0 +1,18 @@
+Analyzing hebbo...                                              
+
+warning • A value for optional parameter 't' isn't ever given • lib/widgets/animated_fish.dart:65:10 • unused_element_parameter
+   info • Parameter 'key' could be a super parameter • lib/widgets/animated_fish.dart:78:9 • use_super_parameters
+   info • Unnecessary use of multiple underscores • lib/widgets/animated_fish.dart:245:20 • unnecessary_underscores
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/widgets/animated_fish.dart:426:111 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/widgets/animated_fish.dart:468:31 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/widgets/animated_fish.dart:481:43 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/widgets/animated_fish.dart:492:32 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/widgets/animated_fish.dart:505:37 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/widgets/animated_fish.dart:522:36 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/widgets/animated_fish.dart:533:29 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/widgets/animated_fish.dart:595:37 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/widgets/animated_fish.dart:619:34 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/widgets/animated_fish.dart:627:40 • deprecated_member_use
+   info • Parameter 'key' could be a super parameter • lib/widgets/animated_fish.dart:649:9 • use_super_parameters
+
+14 issues found. (ran in 1.2s)

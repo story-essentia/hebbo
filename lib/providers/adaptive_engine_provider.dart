@@ -66,6 +66,15 @@ class AdaptiveEngineNotifier extends StateNotifier<AdaptiveDifficultyState> {
       downWindow: [],
     );
   }
+
+  /// Resets the engine to a specific level and clears all performance history.
+  void reset(int level) {
+    state = AdaptiveDifficultyState(
+      currentLevel: level.clamp(1, 10),
+      upWindow: const [],
+      downWindow: const [],
+    );
+  }
 }
 
 final difficultyRepositoryProvider = Provider<IDifficultyRepository>((ref) {

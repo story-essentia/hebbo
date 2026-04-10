@@ -21,6 +21,18 @@ class FlankerSessionState {
   final List<dynamic> bufferedTrials;
   final bool isSessionComplete;
 
+  /// True before the very first trial — fish are in top-down state.
+  final bool isPreTrial;
+
+  /// True between trials — fish return to top-down during reset.
+  final bool isResetting;
+
+  /// True when timeout occurred — game holds until the player taps to continue.
+  final bool isWaitingForContinue;
+
+  /// Dynamic duration for the reset phase (ms).
+  final int resetDurationMs;
+
   const FlankerSessionState({
     this.trialsRemaining = 75,
     this.currentStimulus,
@@ -28,6 +40,10 @@ class FlankerSessionState {
     this.feedbackState = FeedbackType.none,
     this.bufferedTrials = const [],
     this.isSessionComplete = false,
+    this.isPreTrial = false,
+    this.isResetting = false,
+    this.isWaitingForContinue = false,
+    this.resetDurationMs = 500,
   });
 
   FlankerSessionState copyWith({
@@ -37,6 +53,10 @@ class FlankerSessionState {
     FeedbackType? feedbackState,
     List<dynamic>? bufferedTrials,
     bool? isSessionComplete,
+    bool? isPreTrial,
+    bool? isResetting,
+    bool? isWaitingForContinue,
+    int? resetDurationMs,
   }) {
     return FlankerSessionState(
       trialsRemaining: trialsRemaining ?? this.trialsRemaining,
@@ -45,6 +65,10 @@ class FlankerSessionState {
       feedbackState: feedbackState ?? this.feedbackState,
       bufferedTrials: bufferedTrials ?? this.bufferedTrials,
       isSessionComplete: isSessionComplete ?? this.isSessionComplete,
+      isPreTrial: isPreTrial ?? this.isPreTrial,
+      isResetting: isResetting ?? this.isResetting,
+      isWaitingForContinue: isWaitingForContinue ?? this.isWaitingForContinue,
+      resetDurationMs: resetDurationMs ?? this.resetDurationMs,
     );
   }
 }

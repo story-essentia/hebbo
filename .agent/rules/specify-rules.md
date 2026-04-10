@@ -1,6 +1,6 @@
 # hebbo Development Guidelines
 
-Auto-generated from all feature plans. Last updated: 2026-04-06
+Auto-generated from all feature plans. Last updated: 2026-04-09
 
 ## Active Technologies
 - Flutter 3.x, Dart 3.x + `flutter_riverpod` (state), `drift` (persistence), `test` (unit verification) (002-adaptive-difficulty-engine)
@@ -29,7 +29,6 @@ Flutter 3.x, Dart 3.x: Follow standard conventions
 - 003-flanker-game-loop: Added Flutter 3.x, Dart 3.x + `flutter_riverpod`, `drift`, `mocktail`
 - 002-adaptive-difficulty-engine: Added Flutter 3.x, Dart 3.x + `flutter_riverpod` (state), `drift` (persistence), `test` (unit verification)
 
-- 001-scaffold-local-storage: Added Flutter 3.x, Dart 3.x + `drift`, `sqlite3_flutter_libs`, `path_provider`, `path`, `drift_dev` (dev), `build_runner` (dev)
 
 <!-- MANUAL ADDITIONS START -->
 <!-- MANUAL ADDITIONS END -->
