@@ -7,6 +7,7 @@ import 'repositories/drift_difficulty_repository.dart';
 import 'repositories/drift_session_repository.dart';
 import 'repositories/drift_trial_repository.dart';
 import 'package:hebbo/screens/flanker_game_screen.dart';
+import 'package:hebbo/providers/database_provider.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -19,6 +20,7 @@ void main() {
   runApp(
     ProviderScope(
       overrides: [
+        databaseProvider.overrideWithValue(database),
         difficultyRepositoryProvider.overrideWithValue(difficultyRepo),
         trialRepositoryProvider.overrideWithValue(trialRepo),
         sessionRepositoryProvider.overrideWithValue(sessionRepo),

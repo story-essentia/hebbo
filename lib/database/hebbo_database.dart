@@ -4,6 +4,7 @@ import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
+import 'package:hebbo/models/progress_models.dart';
 
 part 'hebbo_database.g.dart';
 
@@ -49,6 +50,89 @@ class HebboDatabase extends _$HebboDatabase {
 
   @override
   int get schemaVersion => 1;
+
+  Future<int?> getPersonalBestRt() async {
+    final result = await customSelect(
+      'SELECT MIN(reaction_ms) as min_rt FROM trials WHERE correct = 1 AND reaction_ms >= 150;'
+    ).getSingleOrNull();
+    return result?.read<int?>('min_rt');
+  }
+
+  Future<int> getTotalSessionsCompleted() async {
+    final result = await customSelect(
+      'SELECT COUNT(id) as count FROM sessions;'
+    ).getSingleOrNull();
+    return result?.read<int>('count') ?? 0;
+  }
+
+  Future<int?> getMostRecentEnvironmentTier() async {
+    final query = select(sessions)
+      ..orderBy([(s) => OrderingTerm(expression: s.id, mode: OrderingMode.desc)])
+      ..limit(1);
+    final result = await query.getSingleOrNull();
+    return result?.environmentTier;
+  }
+
+  Future<List<SessionChartData>> getSessionChartData() async {
+    final result = await customSelect('''
+      SELECT 
+        s.session_num, 
+        s.ending_level,
+        AVG(CASE WHEN t.type = 'congruent' THEN t.reaction_ms END) as avg_congruent,
+        AVG(CASE WHEN t.type = 'incongruent' THEN t.reaction_ms END) as avg_incongruent
+      FROM sessions s
+      LEFT JOIN trials t ON t.session_id = s.id AND t.correct = 1
+      GROUP BY s.id
+      ORDER BY s.session_num ASC;
+    ''').get();
+
+    return result.map((row) {
+      return SessionChartData(
+        sessionNum: row.read<int>('session_num'),
+        avgCongruentRt: row.read<double?>('avg_congruent') ?? 0.0,
+        avgIncongruentRt: row.read<double?>('avg_incongruent') ?? 0.0,
+        endingDifficulty: row.read<int>('ending_level'),
+      );
+    }).toList();
+  }
+
+  Future<void> clearAllData() async {
+    await delete(sessions).go();
+    await delete(trials).go();
+    await delete(difficultyStates).go();
+  }
+
+  Future<void> seedMockSessions() async {
+    final existing = await getTotalSessionsCompleted();
+    if (existing > 0) return;
+
+    for (int i = 1; i <= 8; i++) {
+        final difficulty = (i / 1.5).ceil().clamp(1, 10);
+        
+        final sessionId = await into(sessions).insert(SessionsCompanion.insert(
+          sessionNum: i,
+          startedAt: DateTime.now().subtract(Duration(days: 9 - i)),
+          endedAt: DateTime.now().subtract(Duration(days: 9 - i)).add(const Duration(minutes: 5)),
+          startingLevel: difficulty == 1 ? 1 : difficulty - 1,
+          endingLevel: difficulty,
+          environmentTier: difficulty < 4 ? 1 : (difficulty < 7 ? 2 : 3),
+        ));
+
+        final congRt = 750 - (i * 30);
+        final incongRt = 850 - (i * 35);
+        for (int t = 0; t < 10; t++) {
+            await into(trials).insert(TrialsCompanion.insert(
+              sessionId: sessionId,
+              trialNum: t,
+              type: t % 2 == 0 ? 'congruent' : 'incongruent',
+              correct: true,
+              reactionMs: t % 2 == 0 ? congRt : incongRt,
+              difficulty: difficulty,
+              timestamp: DateTime.now(),
+            ));
+        }
+    }
+  }
 }
 
 LazyDatabase _openConnection() {
