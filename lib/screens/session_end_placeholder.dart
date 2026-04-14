@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 
 import 'package:hebbo/screens/flanker_game_screen.dart';
 
+import 'package:hebbo/screens/progress_screen.dart';
+
 class SessionEndPlaceholder extends StatelessWidget {
   const SessionEndPlaceholder({super.key});
 
@@ -26,7 +28,10 @@ class SessionEndPlaceholder extends StatelessWidget {
             }),
             const SizedBox(height: 16),
             _buildButton(context, 'See progress', Colors.green, () {
-               // Navigation to progress screen (future milestone)
+               Navigator.push(
+                 context,
+                 MaterialPageRoute(builder: (_) => const ProgressScreen()),
+               );
             }),
             const SizedBox(height: 16),
             _buildButton(context, 'Back to menu', Colors.grey.shade800, () {

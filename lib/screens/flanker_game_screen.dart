@@ -4,6 +4,7 @@ import 'package:hebbo/logic/flanker_domain.dart';
 import 'package:hebbo/providers/flanker_game_provider.dart';
 import 'package:hebbo/screens/session_end_placeholder.dart';
 import 'package:hebbo/widgets/fish_row_widget.dart';
+import 'package:hebbo/providers/database_provider.dart';
 
 class FlankerGameScreen extends ConsumerStatefulWidget {
   const FlankerGameScreen({super.key});
@@ -81,6 +82,38 @@ class _FlankerGameScreenState extends ConsumerState<FlankerGameScreen> {
                 'Trials Remaining: ${state.trialsRemaining}',
                 style: const TextStyle(color: Colors.white, fontSize: 18),
               ),
+            ),
+          ),
+          
+          // Debug Buttons
+          Positioned(
+            top: 40,
+            right: 16,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(builder: (_) => const SessionEndPlaceholder()),
+                    );
+                  },
+                  child: const Text("Debug Progress"),
+                ),
+                const SizedBox(height: 8),
+                ElevatedButton(
+                  onPressed: () async {
+                    final db = ref.read(databaseProvider);
+                    await db.clearAllData();
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text("Database cleared")),
+                    );
+                  },
+                  style: ElevatedButton.styleFrom(backgroundColor: Colors.red.withOpacity(0.8)),
+                  child: const Text("Reset DB", style: TextStyle(color: Colors.white)),
+                ),
+              ],
             ),
           ),
         ],
