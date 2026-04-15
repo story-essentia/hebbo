@@ -1,11 +1,3 @@
-enum Side {
-  left,
-  right;
-}
+enum Side { left, right }
 
-enum FeedbackType {
-  none,
-  success,
-  fail,
-  timeout;
-}
+enum FeedbackType { none, success, fail, timeout }

@@ -40,7 +40,7 @@ class ProgressNotifier extends AsyncNotifier<ProgressState> {
 
     final pbRt = await db.getPersonalBestRt() ?? 0;
     final totalSessions = await db.getTotalSessionsCompleted();
-    
+
     final tierInt = await db.getMostRecentEnvironmentTier() ?? 1;
     String envName = "Shallow reef";
     if (tierInt == 2) envName = "Open ocean";
@@ -54,7 +54,7 @@ class ProgressNotifier extends AsyncNotifier<ProgressState> {
 
     final rawData = await db.getSessionChartData();
     var displayData = rawData;
-    
+
     if (!showAllTime && displayData.length > 10) {
       displayData = displayData.sublist(displayData.length - 10);
     }
@@ -68,10 +68,10 @@ class ProgressNotifier extends AsyncNotifier<ProgressState> {
 
   Future<void> toggleViewMode() async {
     if (state.value == null) return;
-    
+
     final newShowAllTime = !state.value!.showAllTime;
-    
-    // We could either filter in-memory or refetch. 
+
+    // We could either filter in-memory or refetch.
     // Since we need to slice differently based on limit, refetching is safest,
     // or just re-slice the full list if we kept it. Re-fetching is very cheap here.
     state = const AsyncValue.loading();
@@ -79,6 +79,8 @@ class ProgressNotifier extends AsyncNotifier<ProgressState> {
   }
 }
 
-final progressProvider = AsyncNotifierProvider<ProgressNotifier, ProgressState>(() {
-  return ProgressNotifier();
-});
+final progressProvider = AsyncNotifierProvider<ProgressNotifier, ProgressState>(
+  () {
+    return ProgressNotifier();
+  },
+);

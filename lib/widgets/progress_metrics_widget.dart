@@ -13,15 +13,35 @@ class ProgressMetricsWidget extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          _buildCard(context, "Best RT", "${metrics.personalBestRtMs}ms", Icons.timer),
-          _buildCard(context, "Sessions", "${metrics.totalSessionsCompleted}", Icons.check_circle_outline),
-          _buildCard(context, "Environment", metrics.currentEnvironmentTier, Icons.water),
+          _buildCard(
+            context,
+            "Best RT",
+            "${metrics.personalBestRtMs}ms",
+            Icons.timer,
+          ),
+          _buildCard(
+            context,
+            "Sessions",
+            "${metrics.totalSessionsCompleted}",
+            Icons.check_circle_outline,
+          ),
+          _buildCard(
+            context,
+            "Environment",
+            metrics.currentEnvironmentTier,
+            Icons.water,
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildCard(BuildContext context, String title, String value, IconData icon) {
+  Widget _buildCard(
+    BuildContext context,
+    String title,
+    String value,
+    IconData icon,
+  ) {
     return Expanded(
       child: Card(
         color: const Color(0xFF301a4d),
@@ -36,14 +56,18 @@ class ProgressMetricsWidget extends StatelessWidget {
               Icon(icon, size: 24, color: const Color(0xFFb7a3cf)),
               const SizedBox(height: 8),
               Text(
-                title, 
+                title,
                 style: const TextStyle(fontSize: 12, color: Color(0xFFb7a3cf)),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 4),
               Text(
-                value, 
-                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFFefdfff)),
+                value,
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFFefdfff),
+                ),
                 textAlign: TextAlign.center,
                 maxLines: 2,
                 overflow: TextOverflow.visible,

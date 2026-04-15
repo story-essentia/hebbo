@@ -10,7 +10,8 @@ class FlankerStimulus {
   });
 
   @override
-  String toString() => 'FlankerStimulus(target: $targetDirection, congruent: $isCongruent)';
+  String toString() =>
+      'FlankerStimulus(target: $targetDirection, congruent: $isCongruent)';
 }
 
 class FlankerSessionState {
@@ -33,6 +34,9 @@ class FlankerSessionState {
   /// Dynamic duration for the reset phase (ms).
   final int resetDurationMs;
 
+  /// True when the game is manually paused by the user.
+  final bool isPaused;
+
   const FlankerSessionState({
     this.trialsRemaining = 75,
     this.currentStimulus,
@@ -44,6 +48,7 @@ class FlankerSessionState {
     this.isResetting = false,
     this.isWaitingForContinue = false,
     this.resetDurationMs = 500,
+    this.isPaused = false,
   });
 
   FlankerSessionState copyWith({
@@ -57,6 +62,7 @@ class FlankerSessionState {
     bool? isResetting,
     bool? isWaitingForContinue,
     int? resetDurationMs,
+    bool? isPaused,
   }) {
     return FlankerSessionState(
       trialsRemaining: trialsRemaining ?? this.trialsRemaining,
@@ -69,6 +75,7 @@ class FlankerSessionState {
       isResetting: isResetting ?? this.isResetting,
       isWaitingForContinue: isWaitingForContinue ?? this.isWaitingForContinue,
       resetDurationMs: resetDurationMs ?? this.resetDurationMs,
+      isPaused: isPaused ?? this.isPaused,
     );
   }
 }

@@ -5,7 +5,8 @@ import '../state/adaptive_difficulty_state.dart';
 class AdaptiveEngineNotifier extends StateNotifier<AdaptiveDifficultyState> {
   final IDifficultyRepository _repository;
 
-  AdaptiveEngineNotifier(this._repository) : super(AdaptiveDifficultyState.initial());
+  AdaptiveEngineNotifier(this._repository)
+    : super(AdaptiveDifficultyState.initial());
 
   /// Loads the initial difficulty level from persistence.
   Future<void> load(String gameId) async {
@@ -27,13 +28,14 @@ class AdaptiveEngineNotifier extends StateNotifier<AdaptiveDifficultyState> {
     final newDownWindow = List<bool>.from(state.downWindow)..add(correct);
 
     // 2. Trim windows if they exceed max lengths
-    final trimmedUp = newUpWindow.length > 20 ? newUpWindow.sublist(newUpWindow.length - 20) : newUpWindow;
-    final trimmedDown = newDownWindow.length > 10 ? newDownWindow.sublist(newDownWindow.length - 10) : newDownWindow;
+    final trimmedUp = newUpWindow.length > 20
+        ? newUpWindow.sublist(newUpWindow.length - 20)
+        : newUpWindow;
+    final trimmedDown = newDownWindow.length > 10
+        ? newDownWindow.sublist(newDownWindow.length - 10)
+        : newDownWindow;
 
-    state = state.copyWith(
-      upWindow: trimmedUp,
-      downWindow: trimmedDown,
-    );
+    state = state.copyWith(upWindow: trimmedUp, downWindow: trimmedDown);
 
     // 3. Evaluate Level UP (80% accuracy over 20 trials)
     if (state.upWindow.length == 20) {
@@ -54,7 +56,7 @@ class AdaptiveEngineNotifier extends StateNotifier<AdaptiveDifficultyState> {
 
   void _performLevelShift(int delta) {
     int newLevel = state.currentLevel + delta;
-    
+
     // Boundary enforcement 1-10
     if (newLevel < 1) newLevel = 1;
     if (newLevel > 10) newLevel = 10;
@@ -81,7 +83,10 @@ final difficultyRepositoryProvider = Provider<IDifficultyRepository>((ref) {
   throw UnimplementedError('Initialize in main.dart');
 });
 
-final adaptiveEngineProvider = StateNotifierProvider<AdaptiveEngineNotifier, AdaptiveDifficultyState>((ref) {
-  final repo = ref.watch(difficultyRepositoryProvider);
-  return AdaptiveEngineNotifier(repo);
-});
+final adaptiveEngineProvider =
+    StateNotifierProvider<AdaptiveEngineNotifier, AdaptiveDifficultyState>((
+      ref,
+    ) {
+      final repo = ref.watch(difficultyRepositoryProvider);
+      return AdaptiveEngineNotifier(repo);
+    });

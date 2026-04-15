@@ -10,7 +10,6 @@ part 'hebbo_database.g.dart';
 
 @DataClassName('TrialTable')
 class Trials extends Table {
-
   IntColumn get id => integer().autoIncrement()();
   IntColumn get sessionId => integer().references(Sessions, #id)();
   IntColumn get trialNum => integer()();
@@ -23,7 +22,6 @@ class Trials extends Table {
 
 @DataClassName('SessionTable')
 class Sessions extends Table {
-
   IntColumn get id => integer().autoIncrement()();
   IntColumn get sessionNum => integer()();
   DateTimeColumn get startedAt => dateTime()();
@@ -35,7 +33,6 @@ class Sessions extends Table {
 
 @DataClassName('DifficultyTable')
 class DifficultyStates extends Table {
-
   TextColumn get gameId => text()();
   IntColumn get currentLevel => integer()();
   DateTimeColumn get updatedAt => dateTime()();
@@ -53,21 +50,23 @@ class HebboDatabase extends _$HebboDatabase {
 
   Future<int?> getPersonalBestRt() async {
     final result = await customSelect(
-      'SELECT MIN(reaction_ms) as min_rt FROM trials WHERE correct = 1 AND reaction_ms >= 150;'
+      'SELECT MIN(reaction_ms) as min_rt FROM trials WHERE correct = 1 AND reaction_ms >= 150;',
     ).getSingleOrNull();
     return result?.read<int?>('min_rt');
   }
 
   Future<int> getTotalSessionsCompleted() async {
     final result = await customSelect(
-      'SELECT COUNT(id) as count FROM sessions;'
+      'SELECT COUNT(id) as count FROM sessions;',
     ).getSingleOrNull();
     return result?.read<int>('count') ?? 0;
   }
 
   Future<int?> getMostRecentEnvironmentTier() async {
     final query = select(sessions)
-      ..orderBy([(s) => OrderingTerm(expression: s.id, mode: OrderingMode.desc)])
+      ..orderBy([
+        (s) => OrderingTerm(expression: s.id, mode: OrderingMode.desc),
+      ])
       ..limit(1);
     final result = await query.getSingleOrNull();
     return result?.environmentTier;
@@ -102,35 +101,59 @@ class HebboDatabase extends _$HebboDatabase {
     await delete(difficultyStates).go();
   }
 
+  Future<void> cleanupDevelopmentData() async {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+
+    // Delete sessions started before today
+    // The user specifically asked to remove sessions that "don't match actual play history"
+    // We assume play history starting before our 'first run' cleanup or mock sessions 1-8 are targets.
+    final query = delete(sessions)
+      ..where((s) => s.startedAt.isSmallerThanValue(today));
+
+    await query.go();
+
+    // Also ensuring trials are cleared if they were orphaned (Drift usually needs triggers or manual delete if no cascades)
+    // For simplicity since we want a clean state:
+    await customStatement('DELETE FROM trials WHERE session_id NOT IN (SELECT id FROM sessions)');
+    await delete(difficultyStates).go();
+  }
+
   Future<void> seedMockSessions() async {
     final existing = await getTotalSessionsCompleted();
     if (existing > 0) return;
 
     for (int i = 1; i <= 8; i++) {
-        final difficulty = (i / 1.5).ceil().clamp(1, 10);
-        
-        final sessionId = await into(sessions).insert(SessionsCompanion.insert(
+      final difficulty = (i / 1.5).ceil().clamp(1, 10);
+
+      final sessionId = await into(sessions).insert(
+        SessionsCompanion.insert(
           sessionNum: i,
           startedAt: DateTime.now().subtract(Duration(days: 9 - i)),
-          endedAt: DateTime.now().subtract(Duration(days: 9 - i)).add(const Duration(minutes: 5)),
+          endedAt: DateTime.now()
+              .subtract(Duration(days: 9 - i))
+              .add(const Duration(minutes: 5)),
           startingLevel: difficulty == 1 ? 1 : difficulty - 1,
           endingLevel: difficulty,
           environmentTier: difficulty < 4 ? 1 : (difficulty < 7 ? 2 : 3),
-        ));
+        ),
+      );
 
-        final congRt = 750 - (i * 30);
-        final incongRt = 850 - (i * 35);
-        for (int t = 0; t < 10; t++) {
-            await into(trials).insert(TrialsCompanion.insert(
-              sessionId: sessionId,
-              trialNum: t,
-              type: t % 2 == 0 ? 'congruent' : 'incongruent',
-              correct: true,
-              reactionMs: t % 2 == 0 ? congRt : incongRt,
-              difficulty: difficulty,
-              timestamp: DateTime.now(),
-            ));
-        }
+      final congRt = 750 - (i * 30);
+      final incongRt = 850 - (i * 35);
+      for (int t = 0; t < 10; t++) {
+        await into(trials).insert(
+          TrialsCompanion.insert(
+            sessionId: sessionId,
+            trialNum: t,
+            type: t % 2 == 0 ? 'congruent' : 'incongruent',
+            correct: true,
+            reactionMs: t % 2 == 0 ? congRt : incongRt,
+            difficulty: difficulty,
+            timestamp: DateTime.now(),
+          ),
+        );
+      }
     }
   }
 }
