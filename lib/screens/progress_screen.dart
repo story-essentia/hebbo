@@ -14,7 +14,10 @@ class ProgressScreen extends ConsumerWidget {
     return Scaffold(
       backgroundColor: const Color(0xFF150629),
       appBar: AppBar(
-        title: const Text("Your Progress", style: TextStyle(color: Color(0xFFefdfff))),
+        title: const Text(
+          "Your Progress",
+          style: TextStyle(color: Color(0xFFefdfff)),
+        ),
         backgroundColor: Colors.transparent,
         elevation: 0,
         iconTheme: const IconThemeData(color: Color(0xFFefdfff)),
@@ -50,19 +53,33 @@ class ProgressScreen extends ConsumerWidget {
                         style: TextButton.styleFrom(
                           foregroundColor: const Color(0xFFff8aa7),
                         ),
-                        child: Text(state.showAllTime ? "All time" : "Last 10",
-                            style: const TextStyle(fontWeight: FontWeight.bold)),
+                        child: Text(
+                          state.showAllTime ? "All time" : "Last 10",
+                          style: const TextStyle(fontWeight: FontWeight.bold),
+                        ),
                       ),
                     ],
                   ),
                   const SizedBox(height: 8),
                   Row(
                     children: const [
-                      _LegendItem(color: Color(0xFFFF8AA7), label: 'Congruent', isDashed: false),
+                      _LegendItem(
+                        color: Color(0xFFFF8AA7),
+                        label: 'Congruent',
+                        isDashed: false,
+                      ),
                       SizedBox(width: 16),
-                      _LegendItem(color: Color(0xFFf0bfff), label: 'Incongruent', isDashed: true),
+                      _LegendItem(
+                        color: Color(0xFFf0bfff),
+                        label: 'Incongruent',
+                        isDashed: true,
+                      ),
                       SizedBox(width: 16),
-                      _LegendItem(color: Color(0xFF00E676), label: 'Difficulty', isDashed: false),
+                      _LegendItem(
+                        color: Color(0xFF00E676),
+                        label: 'Difficulty',
+                        isDashed: false,
+                      ),
                     ],
                   ),
                   const SizedBox(height: 24),
@@ -75,11 +92,17 @@ class ProgressScreen extends ConsumerWidget {
             ),
           );
         },
-        loading: () => const Center(child: CircularProgressIndicator(color: Colors.white)),
-        error: (err, stack) => Center(child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Text('Error: $err', style: const TextStyle(color: Colors.red)),
-        )),
+        loading: () =>
+            const Center(child: CircularProgressIndicator(color: Colors.white)),
+        error: (err, stack) => Center(
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Text(
+              'Error: $err',
+              style: const TextStyle(color: Colors.red),
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -90,7 +113,11 @@ class _LegendItem extends StatelessWidget {
   final String label;
   final bool isDashed;
 
-  const _LegendItem({required this.color, required this.label, required this.isDashed});
+  const _LegendItem({
+    required this.color,
+    required this.label,
+    required this.isDashed,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -130,13 +157,19 @@ class _LinePainter extends CustomPainter {
     if (isDashed) {
       double dashWidth = 4, dashSpace = 3, startX = 0;
       while (startX < size.width) {
-        canvas.drawLine(Offset(startX, size.height / 2),
-            Offset(startX + dashWidth, size.height / 2), paint);
+        canvas.drawLine(
+          Offset(startX, size.height / 2),
+          Offset(startX + dashWidth, size.height / 2),
+          paint,
+        );
         startX += dashWidth + dashSpace;
       }
     } else {
       canvas.drawLine(
-          Offset(0, size.height / 2), Offset(size.width, size.height / 2), paint);
+        Offset(0, size.height / 2),
+        Offset(size.width, size.height / 2),
+        paint,
+      );
     }
   }
 

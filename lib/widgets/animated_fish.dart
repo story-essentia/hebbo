@@ -98,7 +98,6 @@ class AnimatedFish extends StatefulWidget {
 
 class _AnimatedFishState extends State<AnimatedFish>
     with TickerProviderStateMixin {
-
   /// Tracks the last side-view direction so the rotation transition
   /// knows which way to turn even after state changes to topDown.
   bool _lastFacingRight = false;
@@ -106,25 +105,25 @@ class _AnimatedFishState extends State<AnimatedFish>
   // ── Side-view animation controllers ────────────────────────────────────────
 
   late final AnimationController _tailCtrl;
-  late final Animation<double>   _tailAngle;
+  late final Animation<double> _tailAngle;
 
   late final AnimationController _bodyCtrl;
-  late final Animation<double>   _bodyAngle;
+  late final Animation<double> _bodyAngle;
 
   late final AnimationController _rippleCtrl;
 
   late final AnimationController _glowCtrl;
-  late final Animation<double>   _glowValue;
+  late final Animation<double> _glowValue;
 
   // ── View transition controller (0 = side view, 1 = top-down view) ─────────
 
   late final AnimationController _viewCtrl;
-  late final Animation<double>   _viewValue;
+  late final Animation<double> _viewValue;
 
   // ── Reset dash controller (0 -> 1 -> 0 vertical movement) ─────────────────
 
   late final AnimationController _dashCtrl;
-  late final Animation<double>   _dashValue;
+  late final Animation<double> _dashValue;
 
   // ── Top-down wiggle controller ─────────────────────────────────────────────
 
@@ -132,14 +131,14 @@ class _AnimatedFishState extends State<AnimatedFish>
 
   // ── Particles / Currents ───────────────────────────────────────────────────
 
-  final _rng     = math.Random();
+  final _rng = math.Random();
   final _bubbles = <_Bubble>[];
   final _streaks = <_Streak>[];
 
   late final Ticker _ticker;
-  Duration _prevElapsed  = Duration.zero;
-  Duration _sinceSpawn   = Duration.zero;
-  Duration _sinceStreak  = Duration.zero;
+  Duration _prevElapsed = Duration.zero;
+  Duration _sinceSpawn = Duration.zero;
+  Duration _sinceStreak = Duration.zero;
 
   static const _spawnInterval = Duration(milliseconds: 600);
   static const _streakInterval = Duration(milliseconds: 100);
@@ -158,7 +157,7 @@ class _AnimatedFishState extends State<AnimatedFish>
 
     _tailAngle = Tween<double>(
       begin: -12 * math.pi / 180,
-      end:    12 * math.pi / 180,
+      end: 12 * math.pi / 180,
     ).animate(CurvedAnimation(parent: _tailCtrl, curve: Curves.easeInOut));
 
     _bodyCtrl = AnimationController(
@@ -168,7 +167,7 @@ class _AnimatedFishState extends State<AnimatedFish>
 
     _bodyAngle = Tween<double>(
       begin: -2 * math.pi / 180,
-      end:    2 * math.pi / 180,
+      end: 2 * math.pi / 180,
     ).animate(CurvedAnimation(parent: _bodyCtrl, curve: Curves.easeInOut));
 
     _rippleCtrl = AnimationController(
@@ -196,11 +195,17 @@ class _AnimatedFishState extends State<AnimatedFish>
     );
     _dashValue = TweenSequence<double>([
       TweenSequenceItem(
-        tween: Tween<double>(begin: 0, end: 1).chain(CurveTween(curve: Curves.easeInOut)),
+        tween: Tween<double>(
+          begin: 0,
+          end: 1,
+        ).chain(CurveTween(curve: Curves.easeInOut)),
         weight: 50,
       ),
       TweenSequenceItem(
-        tween: Tween<double>(begin: 1, end: 0).chain(CurveTween(curve: Curves.easeInOut)),
+        tween: Tween<double>(
+          begin: 1,
+          end: 0,
+        ).chain(CurveTween(curve: Curves.easeInOut)),
         weight: 50,
       ),
     ]).animate(_dashCtrl);
@@ -223,8 +228,8 @@ class _AnimatedFishState extends State<AnimatedFish>
     if (!mounted) return;
 
     final dt = elapsed - _prevElapsed;
-    _prevElapsed  = elapsed;
-    _sinceSpawn  += dt;
+    _prevElapsed = elapsed;
+    _sinceSpawn += dt;
     _sinceStreak += dt;
 
     final dtFraction = dt.inMilliseconds / _lifetimeMs;
@@ -239,29 +244,34 @@ class _AnimatedFishState extends State<AnimatedFish>
     }
     _streaks.removeWhere((s) => s.t >= 1.0);
 
-    final isNeutral = widget.currentState == FishState.swimLeftNeutral ||
-                      widget.currentState == FishState.swimRightNeutral;
-    
+    final isNeutral =
+        widget.currentState == FishState.swimLeftNeutral ||
+        widget.currentState == FishState.swimRightNeutral;
+
     final isTopDown = widget.currentState == FishState.topDown;
 
     if (_sinceSpawn >= _spawnInterval && isNeutral) {
       _sinceSpawn = Duration.zero;
-      _bubbles.add(_Bubble(
-        x0:     28 + _rng.nextDouble() * 14,
-        y0:     112,
-        radius: 2.5 + _rng.nextDouble() * 5.0,
-        driftX: _rng.nextDouble() * 40 - 20,
-      ));
+      _bubbles.add(
+        _Bubble(
+          x0: 28 + _rng.nextDouble() * 14,
+          y0: 112,
+          radius: 2.5 + _rng.nextDouble() * 5.0,
+          driftX: _rng.nextDouble() * 40 - 20,
+        ),
+      );
     }
 
     if (_sinceStreak >= _streakInterval && isTopDown) {
       _sinceStreak = Duration.zero;
-      _streaks.add(_Streak(
-        x0: 80 + _rng.nextDouble() * 40,
-        y0: 160 + _rng.nextDouble() * 30, // behind tail
-        length: 20 + _rng.nextDouble() * 30,
-        speed: 150 + _rng.nextDouble() * 100,
-      ));
+      _streaks.add(
+        _Streak(
+          x0: 80 + _rng.nextDouble() * 40,
+          y0: 160 + _rng.nextDouble() * 30, // behind tail
+          length: 20 + _rng.nextDouble() * 30,
+          speed: 150 + _rng.nextDouble() * 100,
+        ),
+      );
     }
 
     setState(() {});
@@ -275,10 +285,11 @@ class _AnimatedFishState extends State<AnimatedFish>
     if (old.currentState != widget.currentState) {
       // Remember the last side-view direction before transitioning to top-down
       if (old.currentState != FishState.topDown) {
-        _lastFacingRight = old.currentState == FishState.swimRightNeutral ||
-                           old.currentState == FishState.swimRightCorrect ||
-                           old.currentState == FishState.swimRightWrong;
-        
+        _lastFacingRight =
+            old.currentState == FishState.swimRightNeutral ||
+            old.currentState == FishState.swimRightCorrect ||
+            old.currentState == FishState.swimRightWrong;
+
         // Trigger dash if we are moving to top-down
         if (widget.currentState == FishState.topDown) {
           _dashCtrl.duration = Duration(milliseconds: widget.resetDurationMs);
@@ -291,10 +302,11 @@ class _AnimatedFishState extends State<AnimatedFish>
   }
 
   void _updateGlow() {
-    final isNeutral = widget.currentState == FishState.swimLeftNeutral ||
-                     widget.currentState == FishState.swimRightNeutral ||
-                     widget.currentState == FishState.timeoutNeutral ||
-                     widget.currentState == FishState.topDown;
+    final isNeutral =
+        widget.currentState == FishState.swimLeftNeutral ||
+        widget.currentState == FishState.swimRightNeutral ||
+        widget.currentState == FishState.timeoutNeutral ||
+        widget.currentState == FishState.topDown;
 
     if (isNeutral) {
       _glowCtrl.reverse();
@@ -332,23 +344,28 @@ class _AnimatedFishState extends State<AnimatedFish>
   Widget build(BuildContext context) {
     return AnimatedBuilder(
       animation: Listenable.merge([
-        _tailCtrl, _bodyCtrl, _rippleCtrl, _glowCtrl,
-        _viewCtrl, _dashCtrl, _topDownWiggleCtrl,
+        _tailCtrl,
+        _bodyCtrl,
+        _rippleCtrl,
+        _glowCtrl,
+        _viewCtrl,
+        _dashCtrl,
+        _topDownWiggleCtrl,
       ]),
-      builder: (_, __) {
+      builder: (context, child) {
         return CustomPaint(
           size: const Size(300, 300),
           painter: _FishPainter(
-            state:          widget.currentState,
-            tailAngle:      _tailAngle.value,
-            bodyAngle:      _bodyAngle.value,
+            state: widget.currentState,
+            tailAngle: _tailAngle.value,
+            bodyAngle: _bodyAngle.value,
             rippleProgress: _rippleCtrl.value,
-            glowValue:      _glowValue.value,
-            bubbles:        List.unmodifiable(_bubbles),
-            streaks:        List.unmodifiable(_streaks),
+            glowValue: _glowValue.value,
+            bubbles: List.unmodifiable(_bubbles),
+            streaks: List.unmodifiable(_streaks),
             viewTransition: _viewValue.value,
-            dashValue:      _dashValue.value,
-            topDownWiggle:  _topDownWiggleCtrl.value,
+            dashValue: _dashValue.value,
+            topDownWiggle: _topDownWiggleCtrl.value,
             lastFacingRight: _lastFacingRight,
           ),
         );
@@ -362,18 +379,17 @@ class _AnimatedFishState extends State<AnimatedFish>
 // ─────────────────────────────────────────────────────────────────────────────
 
 class _FishPainter extends CustomPainter {
-
-  final FishState     state;
-  final double        tailAngle;
-  final double        bodyAngle;
-  final double        rippleProgress;
-  final double        glowValue;
+  final FishState state;
+  final double tailAngle;
+  final double bodyAngle;
+  final double rippleProgress;
+  final double glowValue;
   final List<_Bubble> bubbles;
   final List<_Streak> streaks;
-  final double        viewTransition;  // 0 = side, 1 = top-down
-  final double        dashValue;       // vertical offset progress
-  final double        topDownWiggle;   // 0..1 oscillation
-  final bool          lastFacingRight; // direction the fish was facing in side view
+  final double viewTransition; // 0 = side, 1 = top-down
+  final double dashValue; // vertical offset progress
+  final double topDownWiggle; // 0..1 oscillation
+  final bool lastFacingRight; // direction the fish was facing in side view
 
   _FishPainter({
     required this.state,
@@ -425,50 +441,52 @@ class _FishPainter extends CustomPainter {
 
   static const _colNeutralBody = Color(0xFF4fb3e8);
   static const _colCorrectBody = Color(0xFF32ff7e);
-  static const _colWrongBody   = Color(0xFFff6b6b);
+  static const _colWrongBody = Color(0xFFff6b6b);
 
-  static const _colNeutralFin  = Color(0xFF1e60ad);
-  static const _colCorrectFin  = Color(0xFF1b944d);
-  static const _colWrongFin    = Color(0xFFc0392b);
+  static const _colNeutralFin = Color(0xFF1e60ad);
+  static const _colCorrectFin = Color(0xFF1b944d);
+  static const _colWrongFin = Color(0xFFc0392b);
 
   static const _colCorrectGlow = Color(0xFF32ff7e);
-  static const _colWrongGlow   = Color(0xFFff6b6b);
+  static const _colWrongGlow = Color(0xFFff6b6b);
 
   Color get _bodyColor {
-    final target = _isCorrect ? _colCorrectBody
-                 : _isWrong   ? _colWrongBody
-                 : _colNeutralBody;
+    final target = _isCorrect
+        ? _colCorrectBody
+        : _isWrong
+        ? _colWrongBody
+        : _colNeutralBody;
     return Color.lerp(_colNeutralBody, target, glowValue)!;
   }
 
   Color get _finColor {
-    final target = _isCorrect ? _colCorrectFin
-                 : _isWrong   ? _colWrongFin
-                 : _colNeutralFin;
+    final target = _isCorrect
+        ? _colCorrectFin
+        : _isWrong
+        ? _colWrongFin
+        : _colNeutralFin;
     return Color.lerp(_colNeutralFin, target, glowValue)!;
   }
 
-  Color get _glowTint =>
-    _isCorrect ? _colCorrectGlow
-  : _isWrong   ? _colWrongGlow
-  : Colors.transparent;
+  Color get _glowTint => _isCorrect
+      ? _colCorrectGlow
+      : _isWrong
+      ? _colWrongGlow
+      : Colors.transparent;
 
   bool get _isRight =>
-    state == FishState.swimRightNeutral ||
-    state == FishState.swimRightCorrect ||
-    state == FishState.swimRightWrong;
+      state == FishState.swimRightNeutral ||
+      state == FishState.swimRightCorrect ||
+      state == FishState.swimRightWrong;
 
   bool get _isCorrect =>
-    state == FishState.swimLeftCorrect ||
-    state == FishState.swimRightCorrect;
+      state == FishState.swimLeftCorrect || state == FishState.swimRightCorrect;
 
   bool get _isWrong =>
-    state == FishState.swimLeftWrong ||
-    state == FishState.swimRightWrong;
+      state == FishState.swimLeftWrong || state == FishState.swimRightWrong;
 
   bool get _isNeutral =>
-    state == FishState.swimLeftNeutral ||
-    state == FishState.swimRightNeutral;
+      state == FishState.swimLeftNeutral || state == FishState.swimRightNeutral;
 
   // ── paint() ──────────────────────────────────────────────────────────────────
 
@@ -495,20 +513,22 @@ class _FishPainter extends CustomPainter {
     final center = Offset(size.width / 2, size.height / 2);
 
     // Determine current side-facing, or fall back to lastFacingRight
-    final facingRight = state == FishState.topDown
-        ? lastFacingRight
-        : _isRight;
+    final facingRight = state == FishState.topDown ? lastFacingRight : _isRight;
 
     // Left-facing → CW (+π/2), Right-facing → CCW (-π/2)
     final rotAngle = facingRight
-        ? -viewTransition * math.pi / 2   // CCW to 12 o'clock
-        :  viewTransition * math.pi / 2;  // CW to 12 o'clock
+        ? -viewTransition *
+              math.pi /
+              2 // CCW to 12 o'clock
+        : viewTransition * math.pi / 2; // CW to 12 o'clock
 
     // Side view: rotates and fades out over 0.0 → 0.65
     if (viewTransition < 0.65) {
       final sideAlpha = (1.0 - viewTransition / 0.65).clamp(0.0, 1.0);
-      canvas.saveLayer(Rect.fromLTWH(0, 0, size.width, size.height),
-        Paint()..color = Color.fromRGBO(255, 255, 255, sideAlpha));
+      canvas.saveLayer(
+        Rect.fromLTWH(0, 0, size.width, size.height),
+        Paint()..color = Color.fromRGBO(255, 255, 255, sideAlpha),
+      );
       canvas.translate(center.dx, center.dy);
       canvas.rotate(rotAngle);
       canvas.translate(-center.dx, -center.dy);
@@ -519,8 +539,10 @@ class _FishPainter extends CustomPainter {
     // Top-down view: fades in over 0.35 → 1.0
     if (viewTransition > 0.35) {
       final tdAlpha = ((viewTransition - 0.35) / 0.65).clamp(0.0, 1.0);
-      canvas.saveLayer(Rect.fromLTWH(0, 0, size.width, size.height),
-        Paint()..color = Color.fromRGBO(255, 255, 255, tdAlpha));
+      canvas.saveLayer(
+        Rect.fromLTWH(0, 0, size.width, size.height),
+        Paint()..color = Color.fromRGBO(255, 255, 255, tdAlpha),
+      );
       _paintTopDown(canvas, size);
       canvas.restore();
     }
@@ -532,8 +554,10 @@ class _FishPainter extends CustomPainter {
 
   void _paintSideView(Canvas canvas, Size size) {
     if (state == FishState.timeoutNeutral) {
-      canvas.saveLayer(Rect.fromLTWH(0, 0, size.width, size.height),
-        Paint()..color = Color.fromRGBO(255, 255, 255, 0.4));
+      canvas.saveLayer(
+        Rect.fromLTWH(0, 0, size.width, size.height),
+        Paint()..color = Color.fromRGBO(255, 255, 255, 0.4),
+      );
     }
 
     canvas.scale(size.width / 200, size.height / 200);
@@ -595,16 +619,18 @@ class _FishPainter extends CustomPainter {
         ..color = Colors.white.withValues(alpha: 0.6)
         ..style = PaintingStyle.stroke
         ..strokeWidth = 4
-        ..strokeCap   = StrokeCap.round,
+        ..strokeCap = StrokeCap.round,
     );
 
     // 5f. Eye
     canvas.drawCircle(
-      const Offset(60, 105), 8,
+      const Offset(60, 105),
+      8,
       Paint()..color = const Color(0xFF2c3e50),
     );
     canvas.drawCircle(
-      const Offset(57, 102), 2.5,
+      const Offset(57, 102),
+      2.5,
       Paint()..color = Colors.white.withValues(alpha: 0.75),
     );
 
@@ -612,8 +638,8 @@ class _FishPainter extends CustomPainter {
     canvas.drawPath(
       _pMouth!,
       Paint()
-        ..color     = const Color(0xFF1e60ad)
-        ..style     = PaintingStyle.stroke
+        ..color = const Color(0xFF1e60ad)
+        ..style = PaintingStyle.stroke
         ..strokeWidth = 4
         ..strokeCap = StrokeCap.round,
     );
@@ -622,8 +648,8 @@ class _FishPainter extends CustomPainter {
     canvas.drawPath(
       _pBodyStripe!,
       Paint()
-        ..color     = Colors.white.withValues(alpha: 0.5)
-        ..style     = PaintingStyle.stroke
+        ..color = Colors.white.withValues(alpha: 0.5)
+        ..style = PaintingStyle.stroke
         ..strokeWidth = 3
         ..strokeCap = StrokeCap.round,
     );
@@ -696,7 +722,7 @@ class _FishPainter extends CustomPainter {
     // the S-curve of a real fish body moving through water.
     final wigglePhase = topDownWiggle * 2 * math.pi;
     final bodyRotation = math.sin(wigglePhase) * 3.0 * math.pi / 180; // ±3°
-    final bodySkew = math.sin(wigglePhase) * 0.02;  // subtle horizontal shear
+    final bodySkew = math.sin(wigglePhase) * 0.02; // subtle horizontal shear
 
     // Center of the fish body in viewBox coords
     const cx = 100.0;
@@ -757,30 +783,39 @@ class _FishPainter extends CustomPainter {
     _paintFill(canvas, rightFinPath, finColor.withValues(alpha: 0.85));
 
     // Fin edge highlights
-    canvas.drawPath(leftFinPath, Paint()
-      ..color = Colors.white.withValues(alpha: 0.2)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.0);
-    canvas.drawPath(rightFinPath, Paint()
-      ..color = Colors.white.withValues(alpha: 0.2)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.0);
+    canvas.drawPath(
+      leftFinPath,
+      Paint()
+        ..color = Colors.white.withValues(alpha: 0.2)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1.0,
+    );
+    canvas.drawPath(
+      rightFinPath,
+      Paint()
+        ..color = Colors.white.withValues(alpha: 0.2)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1.0,
+    );
 
     // ── 3. Main body — elongated ellipse, head at top ───────────────────
     final bodyPath = Path()
-      ..moveTo(100, 25)   // nose tip
-      ..cubicTo(130, 30, 135, 60, 132, 100)   // right curve of body
-      ..cubicTo(130, 140, 120, 165, 100, 170)  // right tail taper
-      ..cubicTo(80, 165, 70, 140, 68, 100)     // left tail taper
-      ..cubicTo(65, 60, 70, 30, 100, 25)       // left curve back to nose
+      ..moveTo(100, 25) // nose tip
+      ..cubicTo(130, 30, 135, 60, 132, 100) // right curve of body
+      ..cubicTo(130, 140, 120, 165, 100, 170) // right tail taper
+      ..cubicTo(80, 165, 70, 140, 68, 100) // left tail taper
+      ..cubicTo(65, 60, 70, 30, 100, 25) // left curve back to nose
       ..close();
     _paintFill(canvas, bodyPath, bodyColor);
 
     // Body edge definition
-    canvas.drawPath(bodyPath, Paint()
-      ..color = darkColor.withValues(alpha: 0.3)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.5);
+    canvas.drawPath(
+      bodyPath,
+      Paint()
+        ..color = darkColor.withValues(alpha: 0.3)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1.5,
+    );
 
     // ── 4. Body shading — belly gradient overlay ────────────────────────
     // Lighter center strip simulating belly from above
@@ -791,48 +826,62 @@ class _FishPainter extends CustomPainter {
       ..cubicTo(90, 155, 85, 130, 84, 100)
       ..cubicTo(82, 70, 85, 40, 100, 35)
       ..close();
-    canvas.drawPath(bellyPath, Paint()
-      ..color = const Color(0xFFa0e1f5).withValues(alpha: 0.35)
-      ..style = PaintingStyle.fill);
+    canvas.drawPath(
+      bellyPath,
+      Paint()
+        ..color = const Color(0xFFa0e1f5).withValues(alpha: 0.35)
+        ..style = PaintingStyle.fill,
+    );
 
     // ── 5. Dorsal Fin — vertical blade along the center line ──────────────
     // To make it look "upward", we draw a narrow, sharp triangle/sliver
     final dorsalFinPath = Path()
-      ..moveTo(100, 60)   // Start from mid-upper body
+      ..moveTo(100, 60) // Start from mid-upper body
       ..quadraticBezierTo(104, 90, 102, 145) // Back edge
       ..quadraticBezierTo(100, 148, 98, 145) // Tail end
-      ..quadraticBezierTo(96, 90, 100, 60)   // Front edge
+      ..quadraticBezierTo(96, 90, 100, 60) // Front edge
       ..close();
-    
+
     // Fill with a slightly lighter/more vibrant fin color to catch "light"
     _paintFill(canvas, dorsalFinPath, finColor.withValues(alpha: 0.9));
-    
+
     // Blade edge line (the very top of the fin)
     final finEdge = Path()
       ..moveTo(100, 65)
       ..quadraticBezierTo(101, 100, 100, 142);
-    canvas.drawPath(finEdge, Paint()
-      ..color = Colors.white.withValues(alpha: 0.45)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.8
-      ..strokeCap = StrokeCap.round);
+    canvas.drawPath(
+      finEdge,
+      Paint()
+        ..color = Colors.white.withValues(alpha: 0.45)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1.8
+        ..strokeCap = StrokeCap.round,
+    );
 
     // Subtle shadow on the base of the fin
     final finBaseShadow = Path()
       ..moveTo(97, 70)
       ..quadraticBezierTo(100, 100, 97, 140);
-    canvas.drawPath(finBaseShadow, Paint()
-      ..color = Colors.black.withValues(alpha: 0.2)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.2
-      ..strokeCap = StrokeCap.round);
+    canvas.drawPath(
+      finBaseShadow,
+      Paint()
+        ..color = Colors.black.withValues(alpha: 0.2)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1.2
+        ..strokeCap = StrokeCap.round,
+    );
 
     // ── 6. Scale pattern — subtle horizontal arcs ───────────────────────
     for (double y = 50; y < 160; y += 18) {
       final scaleWidth = 15.0 * (1.0 - ((y - 100).abs() / 80)).clamp(0.3, 1.0);
       canvas.drawArc(
-        Rect.fromCenter(center: Offset(100, y), width: scaleWidth * 2, height: 8),
-        0, math.pi,
+        Rect.fromCenter(
+          center: Offset(100, y),
+          width: scaleWidth * 2,
+          height: 8,
+        ),
+        0,
+        math.pi,
         false,
         Paint()
           ..color = Colors.white.withValues(alpha: 0.1)
@@ -864,11 +913,13 @@ class _FishPainter extends CustomPainter {
 
     // Specular highlights
     canvas.drawCircle(
-      const Offset(83, 45), 2.0,
+      const Offset(83, 45),
+      2.0,
       Paint()..color = Colors.white.withValues(alpha: 0.85),
     );
     canvas.drawCircle(
-      const Offset(113, 45), 2.0,
+      const Offset(113, 45),
+      2.0,
       Paint()..color = Colors.white.withValues(alpha: 0.85),
     );
 
@@ -876,21 +927,27 @@ class _FishPainter extends CustomPainter {
     final mouthPath = Path()
       ..moveTo(95, 28)
       ..quadraticBezierTo(100, 32, 105, 28);
-    canvas.drawPath(mouthPath, Paint()
-      ..color = darkColor.withValues(alpha: 0.7)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 2.0
-      ..strokeCap = StrokeCap.round);
+    canvas.drawPath(
+      mouthPath,
+      Paint()
+        ..color = darkColor.withValues(alpha: 0.7)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 2.0
+        ..strokeCap = StrokeCap.round,
+    );
 
     // Lip highlight
     final lipHighlight = Path()
       ..moveTo(96, 26)
       ..quadraticBezierTo(100, 24, 104, 26);
-    canvas.drawPath(lipHighlight, Paint()
-      ..color = Colors.white.withValues(alpha: 0.2)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.0
-      ..strokeCap = StrokeCap.round);
+    canvas.drawPath(
+      lipHighlight,
+      Paint()
+        ..color = Colors.white.withValues(alpha: 0.2)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1.0
+        ..strokeCap = StrokeCap.round,
+    );
 
     // ── 9. Small bubble trail (behind/below the fish) ──────────────────
     for (final b in bubbles) {
@@ -901,7 +958,8 @@ class _FishPainter extends CustomPainter {
       final op = ((1.0 - t) * 0.4).clamp(0.0, 0.4);
 
       canvas.drawCircle(
-        Offset(x, y), b.radius * 0.7,
+        Offset(x, y),
+        b.radius * 0.7,
         Paint()
           ..color = Colors.white.withValues(alpha: op)
           ..style = PaintingStyle.fill,
@@ -916,7 +974,9 @@ class _FishPainter extends CustomPainter {
   void _paintFill(Canvas canvas, Path path, Color color) {
     canvas.drawPath(
       path,
-      Paint()..color = color..style = PaintingStyle.fill,
+      Paint()
+        ..color = color
+        ..style = PaintingStyle.fill,
     );
   }
 
@@ -930,22 +990,22 @@ class _FishPainter extends CustomPainter {
 
   void _drawRipples(Canvas canvas) {
     const maxRadius = 105.0;
-    const center    = Offset(90, 105);
-    const delays    = [0.0, 0.25, 0.5];
+    const center = Offset(90, 105);
+    const delays = [0.0, 0.25, 0.5];
 
     for (final delay in delays) {
       double t = (rippleProgress - delay) % 1.0;
       if (t < 0) t += 1.0;
 
-      final radius  = maxRadius * Curves.easeOut.transform(t);
+      final radius = maxRadius * Curves.easeOut.transform(t);
       final opacity = (1.0 - t) * 0.7 * glowValue;
 
       canvas.drawCircle(
         center,
         radius,
         Paint()
-          ..color       = _glowTint.withValues(alpha: opacity.clamp(0.0, 1.0))
-          ..style       = PaintingStyle.stroke
+          ..color = _glowTint.withValues(alpha: opacity.clamp(0.0, 1.0))
+          ..style = PaintingStyle.stroke
           ..strokeWidth = 3.5,
       );
     }
@@ -955,23 +1015,25 @@ class _FishPainter extends CustomPainter {
 
   void _drawBubbles(Canvas canvas) {
     for (final b in bubbles) {
-      final t  = b.t.clamp(0.0, 1.0);
-      final x  = b.x0 + b.driftX * t;
-      final y  = b.y0 - 220 * t;
+      final t = b.t.clamp(0.0, 1.0);
+      final x = b.x0 + b.driftX * t;
+      final y = b.y0 - 220 * t;
       final op = ((1.0 - t) * 0.6).clamp(0.0, 0.6);
 
       canvas.drawCircle(
-        Offset(x, y), b.radius,
+        Offset(x, y),
+        b.radius,
         Paint()
           ..color = Colors.white.withValues(alpha: op)
           ..style = PaintingStyle.fill,
       );
 
       canvas.drawCircle(
-        Offset(x, y), b.radius,
+        Offset(x, y),
+        b.radius,
         Paint()
-          ..color       = Colors.white.withValues(alpha: op * 0.45)
-          ..style       = PaintingStyle.stroke
+          ..color = Colors.white.withValues(alpha: op * 0.45)
+          ..style = PaintingStyle.stroke
           ..strokeWidth = 0.8,
       );
     }

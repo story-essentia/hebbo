@@ -10,7 +10,12 @@ class ProgressChart extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (data.isEmpty) {
-      return const Center(child: Text("No session data available.", style: TextStyle(color: Colors.white70)));
+      return const Center(
+        child: Text(
+          "No session data available.",
+          style: TextStyle(color: Colors.white70),
+        ),
+      );
     }
 
     final double rawMinRt = _getMinRt();
@@ -18,7 +23,7 @@ class ProgressChart extends StatelessWidget {
 
     final double yMinCalc = ((rawMinRt / 50).floor() * 50.0) - 50.0;
     final double yMaxCalc = ((rawMaxRt / 50).ceil() * 50.0) + 50.0;
-    
+
     final double yMin = yMinCalc < 0 ? 0 : yMinCalc;
     final double yMax = yMaxCalc <= yMin ? yMin + 100 : yMaxCalc;
 
@@ -32,7 +37,9 @@ class ProgressChart extends StatelessWidget {
           maxX: data.last.sessionNum.toDouble() + 0.5,
           lineBarsData: [
             LineChartBarData(
-              spots: data.map((d) => FlSpot(d.sessionNum.toDouble(), d.avgCongruentRt)).toList(),
+              spots: data
+                  .map((d) => FlSpot(d.sessionNum.toDouble(), d.avgCongruentRt))
+                  .toList(),
               isCurved: true,
               color: const Color(0xFFFF8AA7),
               barWidth: 3,
@@ -41,7 +48,11 @@ class ProgressChart extends StatelessWidget {
               belowBarData: BarAreaData(show: false),
             ),
             LineChartBarData(
-              spots: data.map((d) => FlSpot(d.sessionNum.toDouble(), d.avgIncongruentRt)).toList(),
+              spots: data
+                  .map(
+                    (d) => FlSpot(d.sessionNum.toDouble(), d.avgIncongruentRt),
+                  )
+                  .toList(),
               isCurved: true,
               color: const Color(0xFFf0bfff),
               barWidth: 3,
@@ -54,7 +65,8 @@ class ProgressChart extends StatelessWidget {
               isStepLineChart: true,
               spots: data.map((d) {
                 // Map difficulty 1..10 to the yMin..yMax range of the RT axis
-                final double diffFactor = (d.endingDifficulty.clamp(1, 10) - 1) / 9.0;
+                final double diffFactor =
+                    (d.endingDifficulty.clamp(1, 10) - 1) / 9.0;
                 final double scaled = yMin + (diffFactor * (yMax - yMin));
                 return FlSpot(d.sessionNum.toDouble(), scaled);
               }).toList(),
@@ -71,10 +83,19 @@ class ProgressChart extends StatelessWidget {
                 reservedSize: 40,
                 interval: 50,
                 getTitlesWidget: (value, meta) {
-                  return Text('${value.toInt()}', style: const TextStyle(fontSize: 10, color: Color(0xFFb7a3cf)));
+                  return Text(
+                    '${value.toInt()}',
+                    style: const TextStyle(
+                      fontSize: 10,
+                      color: Color(0xFFb7a3cf),
+                    ),
+                  );
                 },
               ),
-              axisNameWidget: const Text("RT (ms)", style: TextStyle(fontSize: 12, color: Color(0xFFb7a3cf))),
+              axisNameWidget: const Text(
+                "RT (ms)",
+                style: TextStyle(fontSize: 12, color: Color(0xFFb7a3cf)),
+              ),
               axisNameSize: 20,
             ),
             rightTitles: AxisTitles(
@@ -86,30 +107,51 @@ class ProgressChart extends StatelessWidget {
                   double difficulty = 1 + ((value - yMin) / (yMax - yMin)) * 9;
                   int diffRound = difficulty.round();
                   if (diffRound < 1 || diffRound > 10) return const SizedBox();
-                  return Text('$diffRound', style: const TextStyle(fontSize: 10, color: Color(0xFFb7a3cf)));
+                  return Text(
+                    '$diffRound',
+                    style: const TextStyle(
+                      fontSize: 10,
+                      color: Color(0xFFb7a3cf),
+                    ),
+                  );
                 },
               ),
-              axisNameWidget: const Text("Level", style: TextStyle(fontSize: 12, color: Color(0xFF00E676))),
+              axisNameWidget: const Text(
+                "Level",
+                style: TextStyle(fontSize: 12, color: Color(0xFF00E676)),
+              ),
               axisNameSize: 20,
             ),
-            topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+            topTitles: const AxisTitles(
+              sideTitles: SideTitles(showTitles: false),
+            ),
             bottomTitles: AxisTitles(
               sideTitles: SideTitles(
                 showTitles: true,
                 interval: 1,
                 getTitlesWidget: (value, meta) {
-                  if (value >= data.first.sessionNum - 0.5 && value <= data.last.sessionNum + 0.5) {
+                  if (value >= data.first.sessionNum - 0.5 &&
+                      value <= data.last.sessionNum + 0.5) {
                     if (value % 1 == 0) {
                       return Padding(
                         padding: const EdgeInsets.only(top: 8.0),
-                        child: Text('${value.toInt()}', style: const TextStyle(fontSize: 10, color: Color(0xFFb7a3cf))),
+                        child: Text(
+                          '${value.toInt()}',
+                          style: const TextStyle(
+                            fontSize: 10,
+                            color: Color(0xFFb7a3cf),
+                          ),
+                        ),
                       );
                     }
                   }
                   return const SizedBox();
                 },
               ),
-              axisNameWidget: const Text("Session", style: TextStyle(fontSize: 12, color: Color(0xFFb7a3cf))),
+              axisNameWidget: const Text(
+                "Session",
+                style: TextStyle(fontSize: 12, color: Color(0xFFb7a3cf)),
+              ),
               axisNameSize: 25,
             ),
           ),
@@ -117,11 +159,11 @@ class ProgressChart extends StatelessWidget {
             show: true,
             horizontalInterval: 50,
             getDrawingHorizontalLine: (value) => FlLine(
-              color: const Color(0xFF514166).withOpacity(0.15),
+              color: const Color(0xFF514166).withValues(alpha: 0.15),
               strokeWidth: 1,
             ),
             getDrawingVerticalLine: (value) => FlLine(
-              color: const Color(0xFF514166).withOpacity(0.15),
+              color: const Color(0xFF514166).withValues(alpha: 0.15),
               strokeWidth: 1,
             ),
           ),
@@ -134,8 +176,12 @@ class ProgressChart extends StatelessWidget {
   double _getMinRt() {
     double minVal = double.infinity;
     for (var d in data) {
-      if (d.avgCongruentRt < minVal && d.avgCongruentRt > 0) minVal = d.avgCongruentRt;
-      if (d.avgIncongruentRt < minVal && d.avgIncongruentRt > 0) minVal = d.avgIncongruentRt;
+      if (d.avgCongruentRt < minVal && d.avgCongruentRt > 0) {
+        minVal = d.avgCongruentRt;
+      }
+      if (d.avgIncongruentRt < minVal && d.avgIncongruentRt > 0) {
+        minVal = d.avgIncongruentRt;
+      }
     }
     return minVal == double.infinity ? 0 : minVal;
   }

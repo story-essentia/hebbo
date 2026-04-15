@@ -6,10 +6,7 @@ import 'package:hebbo/widgets/animated_fish.dart';
 class FishRowWidget extends StatelessWidget {
   final FlankerSessionState state;
 
-  const FishRowWidget({
-    super.key,
-    required this.state,
-  });
+  const FishRowWidget({super.key, required this.state});
 
   @override
   Widget build(BuildContext context) {
@@ -19,8 +16,8 @@ class FishRowWidget extends StatelessWidget {
     final targetSide = stimulus?.targetDirection ?? Side.left;
     final flankerSide = stimulus != null
         ? (stimulus.isCongruent
-            ? targetSide
-            : (targetSide == Side.left ? Side.right : Side.left))
+              ? targetSide
+              : (targetSide == Side.left ? Side.right : Side.left))
         : Side.left;
 
     Widget row = Center(
@@ -63,25 +60,36 @@ class FishRowWidget extends StatelessWidget {
     }
     // Timeout hold → fish stay in their current side orientation, just dimmed via Opacity
     else if (state.isWaitingForContinue) {
-      fishState = side == Side.left ? FishState.swimLeftNeutral : FishState.swimRightNeutral;
+      fishState = side == Side.left
+          ? FishState.swimLeftNeutral
+          : FishState.swimRightNeutral;
     }
     // No stimulus active and no feedback → top-down (idle)
-    else if (!state.isStimulusActive && state.feedbackState == FeedbackType.none) {
+    else if (!state.isStimulusActive &&
+        state.feedbackState == FeedbackType.none) {
       fishState = FishState.topDown;
     }
     // Center fish gets feedback coloring
     else if (isCenter) {
       if (state.feedbackState == FeedbackType.success) {
-        fishState = side == Side.left ? FishState.swimLeftCorrect : FishState.swimRightCorrect;
+        fishState = side == Side.left
+            ? FishState.swimLeftCorrect
+            : FishState.swimRightCorrect;
       } else if (state.feedbackState == FeedbackType.fail) {
-        fishState = side == Side.left ? FishState.swimLeftWrong : FishState.swimRightWrong;
+        fishState = side == Side.left
+            ? FishState.swimLeftWrong
+            : FishState.swimRightWrong;
       } else {
-        fishState = side == Side.left ? FishState.swimLeftNeutral : FishState.swimRightNeutral;
+        fishState = side == Side.left
+            ? FishState.swimLeftNeutral
+            : FishState.swimRightNeutral;
       }
     }
     // Flankers remain neutral during active trial
     else {
-      fishState = side == Side.left ? FishState.swimLeftNeutral : FishState.swimRightNeutral;
+      fishState = side == Side.left
+          ? FishState.swimLeftNeutral
+          : FishState.swimRightNeutral;
     }
 
     return SizedBox(

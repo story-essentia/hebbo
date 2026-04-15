@@ -17,38 +17,55 @@ final sessionRepositoryProvider = Provider<ISessionRepository>((ref) {
   throw UnimplementedError('Initialize in main.dart');
 });
 
-final flankerTrialGeneratorProvider = Provider((ref) => FlankerTrialGenerator());
+final flankerTrialGeneratorProvider = Provider(
+  (ref) => FlankerTrialGenerator(),
+);
 
-final flankerGameProvider = StateNotifierProvider<FlankerGameNotifier, FlankerSessionState>((ref) {
-  final generator = ref.watch(flankerTrialGeneratorProvider);
-  final adaptiveEngine = ref.watch(adaptiveEngineProvider.notifier);
-  final trialRepo = ref.watch(trialRepositoryProvider);
-  final sessionRepo = ref.watch(sessionRepositoryProvider);
-  
-  return FlankerGameNotifier(generator, adaptiveEngine, trialRepo, sessionRepo);
-});
+final flankerGameProvider =
+    StateNotifierProvider<FlankerGameNotifier, FlankerSessionState>((ref) {
+      final generator = ref.watch(flankerTrialGeneratorProvider);
+      final adaptiveEngine = ref.watch(adaptiveEngineProvider.notifier);
+      final trialRepo = ref.watch(trialRepositoryProvider);
+      final sessionRepo = ref.watch(sessionRepositoryProvider);
+
+      return FlankerGameNotifier(
+        generator,
+        adaptiveEngine,
+        trialRepo,
+        sessionRepo,
+      );
+    });
 
 class FlankerGameNotifier extends StateNotifier<FlankerSessionState> {
   final FlankerTrialGenerator _generator;
   final AdaptiveEngineNotifier _adaptiveEngine;
   final ITrialRepository _trialRepo;
   final ISessionRepository _sessionRepo;
-  
+
   Timer? _timeoutTimer;
   final Stopwatch _stopwatch = Stopwatch();
   DateTime? _sessionStartTime;
   int _initialLevel = 1;
+  int? _pausedRemainingMs;
 
   FlankerGameNotifier(
-    this._generator, 
+    this._generator,
     this._adaptiveEngine,
     this._trialRepo,
     this._sessionRepo,
   ) : super(const FlankerSessionState());
 
   static const Map<int, int> _isiMap = {
-    1: 1500, 2: 1300, 3: 1100, 4: 950, 5: 800,
-    6: 700, 7: 600, 8: 500, 9: 450, 10: 400,
+    1: 1500,
+    2: 1300,
+    3: 1100,
+    4: 950,
+    5: 800,
+    6: 700,
+    7: 600,
+    8: 500,
+    9: 450,
+    10: 400,
   };
 
   /// Duration of correct/wrong feedback flash (ms)
@@ -66,10 +83,7 @@ class FlankerGameNotifier extends StateNotifier<FlankerSessionState> {
     _adaptiveEngine.reset(initialLevel);
 
     // Start with all fish in top-down state before the first trial
-    state = const FlankerSessionState(
-      trialsRemaining: 75,
-      isPreTrial: true,
-    );
+    state = const FlankerSessionState(trialsRemaining: 75, isPreTrial: true);
 
     // Hold in top-down for a moment, then begin the first trial
     Future.delayed(const Duration(milliseconds: _preTrialHoldMs), () {
@@ -84,7 +98,7 @@ class FlankerGameNotifier extends StateNotifier<FlankerSessionState> {
     }
 
     final stimulus = _generator.generateStimulus(level);
-    
+
     state = state.copyWith(
       currentStimulus: stimulus,
       isStimulusActive: true,
@@ -99,12 +113,12 @@ class FlankerGameNotifier extends StateNotifier<FlankerSessionState> {
 
     _timeoutTimer?.cancel();
     _timeoutTimer = Timer(const Duration(milliseconds: 2000), () {
-      _handleTimeout();
+      if (mounted) _handleTimeout();
     });
   }
 
   void reportResponse(Side side) {
-    if (!state.isStimulusActive) return;
+    if (!state.isStimulusActive || state.isPaused) return;
     _handleTapResponse(side);
   }
 
@@ -124,7 +138,9 @@ class FlankerGameNotifier extends StateNotifier<FlankerSessionState> {
       'rt': reactionTime,
       'correct': isCorrect,
       'level': nextLevel,
-      'type': stimulus != null ? (stimulus.isCongruent ? 'congruent' : 'incongruent') : 'unknown',
+      'type': stimulus != null
+          ? (stimulus.isCongruent ? 'congruent' : 'incongruent')
+          : 'unknown',
     };
 
     // Flash feedback for 200ms
@@ -140,7 +156,10 @@ class FlankerGameNotifier extends StateNotifier<FlankerSessionState> {
       if (!mounted) return;
 
       final totalIsi = _isiMap[nextLevel] ?? 800;
-      final remainingReset = (totalIsi - _feedbackDurationMs).clamp(_resetDurationMs, totalIsi);
+      final remainingReset = (totalIsi - _feedbackDurationMs).clamp(
+        _resetDurationMs,
+        totalIsi,
+      );
 
       state = state.copyWith(
         feedbackState: FeedbackType.none,
@@ -169,7 +188,9 @@ class FlankerGameNotifier extends StateNotifier<FlankerSessionState> {
       'rt': reactionTime,
       'correct': false,
       'level': nextLevel,
-      'type': stimulus != null ? (stimulus.isCongruent ? 'congruent' : 'incongruent') : 'unknown',
+      'type': stimulus != null
+          ? (stimulus.isCongruent ? 'congruent' : 'incongruent')
+          : 'unknown',
     };
 
     // Dim the fish and hold — wait for player to tap
@@ -185,7 +206,7 @@ class FlankerGameNotifier extends StateNotifier<FlankerSessionState> {
   /// Called when the player taps during a timeout-hold.
   /// This is NOT a trial response — just a continue signal.
   void continueAfterTimeout() {
-    if (!state.isWaitingForContinue) return;
+    if (!state.isWaitingForContinue || state.isPaused) return;
 
     final nextLevel = _adaptiveEngine.state.currentLevel;
 
@@ -205,32 +226,60 @@ class FlankerGameNotifier extends StateNotifier<FlankerSessionState> {
     });
   }
 
+  void togglePause() {
+    if (state.isSessionComplete || state.isResetting || state.isPreTrial) return;
+
+    if (state.isPaused) {
+      // Resume
+      state = state.copyWith(isPaused: false);
+      if (state.isStimulusActive) {
+        _stopwatch.start();
+        _timeoutTimer =
+            Timer(Duration(milliseconds: _pausedRemainingMs ?? 2000), () {
+          if (mounted) _handleTimeout();
+        });
+      }
+    } else {
+      // Pause
+      if (state.isStimulusActive) {
+        _pausedRemainingMs = (2000 - _stopwatch.elapsedMilliseconds).clamp(0, 2000);
+        _stopwatch.stop();
+        _timeoutTimer?.cancel();
+      }
+      state = state.copyWith(isPaused: true);
+    }
+  }
+
   Future<void> _persistSession() async {
     final sessions = await _sessionRepo.getAllSessions();
     final nextSessionNum = sessions.length + 1;
 
-    final sessionId = await _sessionRepo.insertSession(SessionEntity(
-      sessionNum: nextSessionNum,
-      startedAt: _sessionStartTime ?? DateTime.now(),
-      endedAt: DateTime.now(),
-      startingLevel: _initialLevel,
-      endingLevel: _adaptiveEngine.state.currentLevel,
-      environmentTier: 1,
-    ));
+    final sessionId = await _sessionRepo.insertSession(
+      SessionEntity(
+        sessionNum: nextSessionNum,
+        startedAt: _sessionStartTime ?? DateTime.now(),
+        endedAt: DateTime.now(),
+        startingLevel: _initialLevel,
+        endingLevel: _adaptiveEngine.state.currentLevel,
+        environmentTier: 1,
+      ),
+    );
 
     for (var i = 0; i < state.bufferedTrials.length; i++) {
       final data = state.bufferedTrials[i];
-      await _trialRepo.insertTrial(TrialEntity(
-        sessionId: sessionId,
-        trialNum: i + 1,
-        type: data['type'],
-        correct: data['correct'],
-        reactionMs: data['rt'],
-        difficulty: data['level'],
-        timestamp: DateTime.now(),
-      ));
+      await _trialRepo.insertTrial(
+        TrialEntity(
+          sessionId: sessionId,
+          trialNum: i + 1,
+          type: data['type'],
+          correct: data['correct'],
+          reactionMs: data['rt'],
+          difficulty: data['level'],
+          timestamp: DateTime.now(),
+        ),
+      );
     }
-    
+
     state = state.copyWith(isSessionComplete: true);
   }
 
