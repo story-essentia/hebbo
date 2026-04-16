@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:hebbo/logic/flanker_domain.dart';
 import 'package:hebbo/providers/flanker_game_provider.dart';
 import 'package:hebbo/screens/session_end_placeholder.dart';
+import 'package:hebbo/providers/adaptive_engine_provider.dart';
 import 'package:hebbo/widgets/fish_row_widget.dart';
 
 class FlankerGameScreen extends ConsumerStatefulWidget {
@@ -18,9 +19,12 @@ class _FlankerGameScreenState extends ConsumerState<FlankerGameScreen> {
   @override
   void initState() {
     super.initState();
-    Future.microtask(
-      () => ref.read(flankerGameProvider.notifier).startSession(1),
-    );
+    Future.microtask(() async {
+      final notifier = ref.read(adaptiveEngineProvider.notifier);
+      await notifier.load('flanker');
+      final startLevel = ref.read(adaptiveEngineProvider).currentLevel;
+      ref.read(flankerGameProvider.notifier).startSession(startLevel);
+    });
   }
 
   @override

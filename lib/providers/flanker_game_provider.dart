@@ -8,6 +8,8 @@ import 'package:hebbo/providers/adaptive_engine_provider.dart';
 import 'package:hebbo/repositories/i_session_repository.dart';
 import 'package:hebbo/repositories/i_trial_repository.dart';
 import 'package:hebbo/state/flanker_session_state.dart';
+import 'package:hebbo/providers/flanker_stats_provider.dart';
+import 'package:hebbo/providers/progress_provider.dart';
 
 final trialRepositoryProvider = Provider<ITrialRepository>((ref) {
   throw UnimplementedError('Initialize in main.dart');
@@ -29,6 +31,7 @@ final flankerGameProvider =
       final sessionRepo = ref.watch(sessionRepositoryProvider);
 
       return FlankerGameNotifier(
+        ref,
         generator,
         adaptiveEngine,
         trialRepo,
@@ -37,6 +40,7 @@ final flankerGameProvider =
     });
 
 class FlankerGameNotifier extends StateNotifier<FlankerSessionState> {
+  final Ref _ref;
   final FlankerTrialGenerator _generator;
   final AdaptiveEngineNotifier _adaptiveEngine;
   final ITrialRepository _trialRepo;
@@ -49,6 +53,7 @@ class FlankerGameNotifier extends StateNotifier<FlankerSessionState> {
   int? _pausedRemainingMs;
 
   FlankerGameNotifier(
+    this._ref,
     this._generator,
     this._adaptiveEngine,
     this._trialRepo,
@@ -131,7 +136,7 @@ class FlankerGameNotifier extends StateNotifier<FlankerSessionState> {
     final stimulus = state.currentStimulus;
     final isCorrect = side == stimulus?.targetDirection;
 
-    _adaptiveEngine.reportTrial(isCorrect);
+    _adaptiveEngine.reportTrial(isCorrect, reactionTime);
     final nextLevel = _adaptiveEngine.state.currentLevel;
 
     final trialData = {
@@ -156,10 +161,7 @@ class FlankerGameNotifier extends StateNotifier<FlankerSessionState> {
       if (!mounted) return;
 
       final totalIsi = _isiMap[nextLevel] ?? 800;
-      final remainingReset = (totalIsi - _feedbackDurationMs).clamp(
-        _resetDurationMs,
-        totalIsi,
-      );
+      final remainingReset = (totalIsi - _feedbackDurationMs).clamp(0, totalIsi);
 
       state = state.copyWith(
         feedbackState: FeedbackType.none,
@@ -181,7 +183,7 @@ class FlankerGameNotifier extends StateNotifier<FlankerSessionState> {
     final reactionTime = _stopwatch.elapsedMilliseconds;
     final stimulus = state.currentStimulus;
 
-    _adaptiveEngine.reportTrial(false);
+    _adaptiveEngine.reportTrial(false, reactionTime);
     final nextLevel = _adaptiveEngine.state.currentLevel;
 
     final trialData = {
@@ -211,7 +213,7 @@ class FlankerGameNotifier extends StateNotifier<FlankerSessionState> {
     final nextLevel = _adaptiveEngine.state.currentLevel;
 
     final totalIsi = _isiMap[nextLevel] ?? 800;
-    final resetDuration = totalIsi.clamp(_resetDurationMs, totalIsi);
+    final resetDuration = totalIsi.clamp(0, totalIsi);
 
     // Transition to top-down reset, then next trial
     state = state.copyWith(
@@ -279,8 +281,15 @@ class FlankerGameNotifier extends StateNotifier<FlankerSessionState> {
         ),
       );
     }
+    
+    // Persist the final level to the difficulty repository for next game start
+    await _adaptiveEngine.save('flanker');
 
     state = state.copyWith(isSessionComplete: true);
+
+    // Invalidate dependent stats providers so they show fresh data when user returns to home/progress
+    _ref.invalidate(flankerStatsProvider);
+    _ref.invalidate(progressProvider);
   }
 
   @override

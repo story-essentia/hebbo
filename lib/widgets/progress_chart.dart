@@ -104,14 +104,21 @@ class ProgressChart extends StatelessWidget {
                 reservedSize: 30,
                 interval: (yMax - yMin) / 9,
                 getTitlesWidget: (value, meta) {
-                  double difficulty = 1 + ((value - yMin) / (yMax - yMin)) * 9;
-                  int diffRound = difficulty.round();
-                  if (diffRound < 1 || diffRound > 10) return const SizedBox();
-                  return Text(
-                    '$diffRound',
-                    style: const TextStyle(
-                      fontSize: 10,
-                      color: Color(0xFFb7a3cf),
+                  // The interval is exactly (yMax - yMin) / 9, so fl_chart calls this at 10 ticks.
+                  // We map those ticks directly to 1..10.
+                  double ratio = (value - yMin) / (yMax - yMin);
+                  int level = (ratio * 9).round() + 1;
+                  
+                  if (level < 1 || level > 10) return const SizedBox();
+
+                  return Padding(
+                    padding: const EdgeInsets.only(left: 8.0),
+                    child: Text(
+                      '$level',
+                      style: const TextStyle(
+                        fontSize: 10,
+                        color: Color(0xFFb7a3cf),
+                      ),
                     ),
                   );
                 },

@@ -1,6 +1,6 @@
 # hebbo Development Guidelines
 
-Auto-generated from all feature plans. Last updated: 2026-04-14
+Auto-generated from all feature plans. Last updated: 2026-04-16
 
 ## Active Technologies
 - Flutter 3.x, Dart 3.x + `flutter_riverpod` (state), `drift` (persistence), `test` (unit verification) (002-adaptive-difficulty-engine)
@@ -10,6 +10,8 @@ Auto-generated from all feature plans. Last updated: 2026-04-14
 - Dart / Flutter + `fl_chart` (to be added), Drift (existing SQLite DB), Riverpod (existing state management) (005-progress-screen)
 - On-device only (local Drift database), no remote sync for MVP (005-progress-screen)
 - [MANDATORY: On-device only (localStorage/IndexedDB), no remote sync for MVP] (006-first-run-homescreen)
+- Flutter (Dart) + `flutter_riverpod`, `drift` (SQLite), `shimmer`, `google_fonts` (007-game-detail-sheet)
+- Drift (SQLite) - on-device only, no remote sync. (007-game-detail-sheet)
 
 - Flutter 3.x, Dart 3.x + `drift`, `sqlite3_flutter_libs`, `path_provider`, `path`, `drift_dev` (dev), `build_runner` (dev) (001-scaffold-local-storage)
 
@@ -29,6 +31,7 @@ tests/
 Flutter 3.x, Dart 3.x: Follow standard conventions
 
 ## Recent Changes
+- 007-game-detail-sheet: Added Flutter (Dart) + `flutter_riverpod`, `drift` (SQLite), `shimmer`, `google_fonts`
 - 006-first-run-homescreen: Added [MANDATORY: On-device only (localStorage/IndexedDB), no remote sync for MVP]
 - 005-progress-screen: Added Dart / Flutter + `fl_chart` (to be added), Drift (existing SQLite DB), Riverpod (existing state management)
 
