@@ -2,12 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hebbo/screens/flanker_game_screen.dart';
 import 'package:hebbo/screens/progress_screen.dart';
+import 'package:hebbo/providers/adaptive_engine_provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class SessionEndPlaceholder extends StatelessWidget {
+class SessionEndPlaceholder extends ConsumerWidget {
   const SessionEndPlaceholder({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final currentLevel = ref.watch(adaptiveEngineProvider).currentLevel;
+
     return Scaffold(
       backgroundColor: const Color(0xFF150629),
       body: SafeArea(
@@ -24,6 +28,16 @@ class SessionEndPlaceholder extends StatelessWidget {
                   style: GoogleFonts.plusJakartaSans(
                     color: const Color(0xFFEFDFFF),
                     fontSize: 32,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Level Reached: $currentLevel',
+                  textAlign: TextAlign.center,
+                  style: GoogleFonts.plusJakartaSans(
+                    color: const Color(0xFFFF8AA7),
+                    fontSize: 18,
                     fontWeight: FontWeight.bold,
                   ),
                 ),

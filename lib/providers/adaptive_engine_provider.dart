@@ -5,10 +5,22 @@ import '../state/adaptive_difficulty_state.dart';
 class AdaptiveEngineNotifier extends StateNotifier<AdaptiveDifficultyState> {
   final IDifficultyRepository _repository;
 
-  AdaptiveEngineNotifier(this._repository)
-    : super(AdaptiveDifficultyState.initial());
+  static const Map<int, int> _isiMap = {
+    1: 1500,
+    2: 1300,
+    3: 1100,
+    4: 950,
+    5: 800,
+    6: 700,
+    7: 600,
+    8: 500,
+    9: 450,
+    10: 400,
+  };
 
-  /// Loads the initial difficulty level from persistence.
+  AdaptiveEngineNotifier(this._repository)
+      : super(AdaptiveDifficultyState.initial());
+
   Future<void> load(String gameId) async {
     final startLevel = await _repository.getDifficultyForGame(gameId);
     if (startLevel != null) {
@@ -16,36 +28,67 @@ class AdaptiveEngineNotifier extends StateNotifier<AdaptiveDifficultyState> {
     }
   }
 
-  /// Saves the current level to persistence.
   Future<void> save(String gameId) async {
     await _repository.upsertDifficulty(gameId, state.currentLevel);
   }
 
-  /// Reports a single trial result and evaluates windows for level adjustments.
-  void reportTrial(bool correct) {
+  void reportTrial(bool correct, int reactionMs) {
     // 1. Update windows
     final newUpWindow = List<bool>.from(state.upWindow)..add(correct);
+    final newUpRtWindow = List<int>.from(state.upRtWindow)..add(reactionMs);
     final newDownWindow = List<bool>.from(state.downWindow)..add(correct);
+    final newDownRtWindow = List<int>.from(state.downRtWindow)..add(reactionMs);
 
-    // 2. Trim windows if they exceed max lengths
+    // 2. Trim windows
     final trimmedUp = newUpWindow.length > 20
         ? newUpWindow.sublist(newUpWindow.length - 20)
         : newUpWindow;
+    final trimmedUpRt = newUpRtWindow.length > 20
+        ? newUpRtWindow.sublist(newUpRtWindow.length - 20)
+        : newUpRtWindow;
     final trimmedDown = newDownWindow.length > 10
         ? newDownWindow.sublist(newDownWindow.length - 10)
         : newDownWindow;
+    final trimmedDownRt = newDownRtWindow.length > 10
+        ? newDownRtWindow.sublist(newDownRtWindow.length - 10)
+        : newDownRtWindow;
 
-    state = state.copyWith(upWindow: trimmedUp, downWindow: trimmedDown);
+    state = state.copyWith(
+      upWindow: trimmedUp,
+      upRtWindow: trimmedUpRt,
+      downWindow: trimmedDown,
+      downRtWindow: trimmedDownRt,
+    );
 
-    // 3. Evaluate Level UP (80% accuracy over 20 trials)
+    // 3. Evaluate Level UP / Maintenance (20-trial window)
     if (state.upWindow.length == 20) {
       if (state.upAccuracy >= 0.8) {
-        _performLevelShift(1);
-        return; // Slate Reset ends the evaluation
+        final currentLevel = state.currentLevel;
+        final currentIsi = _isiMap[currentLevel] ?? 800;
+        final nextLevelIsi = _isiMap[currentLevel + 1] ?? 0;
+        final averageRt = state.avgRt;
+
+        if (averageRt <= nextLevelIsi && currentLevel < 10) {
+          // Rule: Acc >= 80% AND RT <= Next Level ISI -> Level UP
+          _performLevelShift(1);
+        } else if (averageRt > currentIsi) {
+          // Rule: Acc >= 80% BUT RT > Current Level ISI -> Level DOWN
+          _performLevelShift(-1);
+        } else {
+          // Rule: Acc >= 80% AND RT is between Next ISI and Current ISI -> Stay
+          // Reset windows to evaluate next block of 20
+          state = state.copyWith(
+            upWindow: [],
+            upRtWindow: [],
+            downWindow: [],
+            downRtWindow: [],
+          );
+        }
+        return;
       }
     }
 
-    // 4. Evaluate Level DOWN (< 60% accuracy over 10 trials, triggered only by failure)
+    // 4. Evaluate Level DOWN (10-trial performance accuracy window, triggered by failure)
     if (!correct && state.downWindow.length == 10) {
       if (state.downAccuracy < 0.6) {
         _performLevelShift(-1);
@@ -55,26 +98,24 @@ class AdaptiveEngineNotifier extends StateNotifier<AdaptiveDifficultyState> {
   }
 
   void _performLevelShift(int delta) {
-    int newLevel = state.currentLevel + delta;
+    int newLevel = (state.currentLevel + delta).clamp(1, 10);
 
-    // Boundary enforcement 1-10
-    if (newLevel < 1) newLevel = 1;
-    if (newLevel > 10) newLevel = 10;
-
-    // Slate Reset: Level changes or boundary triggers always clear windows
     state = state.copyWith(
       currentLevel: newLevel,
       upWindow: [],
+      upRtWindow: [],
       downWindow: [],
+      downRtWindow: [],
     );
   }
 
-  /// Resets the engine to a specific level and clears all performance history.
   void reset(int level) {
     state = AdaptiveDifficultyState(
       currentLevel: level.clamp(1, 10),
       upWindow: const [],
       downWindow: const [],
+      upRtWindow: const [],
+      downRtWindow: const [],
     );
   }
 }
@@ -85,8 +126,8 @@ final difficultyRepositoryProvider = Provider<IDifficultyRepository>((ref) {
 
 final adaptiveEngineProvider =
     StateNotifierProvider<AdaptiveEngineNotifier, AdaptiveDifficultyState>((
-      ref,
-    ) {
-      final repo = ref.watch(difficultyRepositoryProvider);
-      return AdaptiveEngineNotifier(repo);
-    });
+  ref,
+) {
+  final repo = ref.watch(difficultyRepositoryProvider);
+  return AdaptiveEngineNotifier(repo);
+});

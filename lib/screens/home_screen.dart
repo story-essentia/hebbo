@@ -1,10 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:hebbo/screens/flanker_game_screen.dart';
 import 'package:hebbo/widgets/about_hebbo_sheet.dart';
+import 'package:hebbo/widgets/flanker_detail_sheet.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
+
+  void _showFlankerDetail(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent, // Let the sheet widget handle its own bg/corners
+      builder: (context) => const FlankerDetailSheet(),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -31,13 +40,7 @@ class HomeScreen extends StatelessWidget {
                 subtitle: 'Attention & Inhibition',
                 icon: Icons.filter_center_focus,
                 isActive: true,
-                onTap: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (context) => const FlankerGameScreen(),
-                    ),
-                  );
-                },
+                onTap: () => _showFlankerDetail(context),
               ),
               const SizedBox(height: 16),
               _buildGameCard(

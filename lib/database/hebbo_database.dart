@@ -50,14 +50,21 @@ class HebboDatabase extends _$HebboDatabase {
 
   Future<int?> getPersonalBestRt() async {
     final result = await customSelect(
-      'SELECT MIN(reaction_ms) as min_rt FROM trials WHERE correct = 1 AND reaction_ms >= 150;',
+      'SELECT MIN(avg_rt) as min_rt FROM ('
+      '  SELECT AVG(t.reaction_ms) as avg_rt '
+      '  FROM sessions s '
+      '  JOIN trials t ON t.session_id = s.id '
+      '  WHERE t.correct = 1 AND t.reaction_ms >= 150 AND s.ended_at IS NOT NULL '
+      '  GROUP BY s.id'
+      ');',
     ).getSingleOrNull();
-    return result?.read<int?>('min_rt');
+    final value = result?.read<double?>('min_rt');
+    return value?.round();
   }
 
   Future<int> getTotalSessionsCompleted() async {
     final result = await customSelect(
-      'SELECT COUNT(id) as count FROM sessions;',
+      'SELECT COUNT(id) as count FROM sessions WHERE ended_at IS NOT NULL;',
     ).getSingleOrNull();
     return result?.read<int>('count') ?? 0;
   }
