@@ -31,6 +31,29 @@ class ProgressChart extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 24.0),
       child: LineChart(
         LineChartData(
+          lineTouchData: LineTouchData(
+            touchTooltipData: LineTouchTooltipData(
+              getTooltipColor: (_) => const Color(0xFF514166),
+              getTooltipItems: (List<LineBarSpot> touchedSpots) {
+                return touchedSpots.map((spot) {
+                  final TextStyle textStyle = TextStyle(
+                    color: spot.bar.color,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                  );
+                  
+                  if (spot.barIndex == 2) {
+                    // Logic to reverse the scaling and show the actual level
+                    double ratio = (spot.y - yMin) / (yMax - yMin);
+                    int level = (ratio * 9).round() + 1;
+                    return LineTooltipItem('Lvl: $level', textStyle);
+                  }
+                  
+                  return LineTooltipItem('${spot.y.round()}ms', textStyle);
+                }).toList();
+              },
+            ),
+          ),
           minY: yMin,
           maxY: yMax,
           minX: data.first.sessionNum.toDouble() - 0.5,
@@ -72,7 +95,7 @@ class ProgressChart extends StatelessWidget {
               }).toList(),
               color: const Color(0xFF00E676),
               barWidth: 2,
-              dotData: const FlDotData(show: false),
+              dotData: const FlDotData(show: true),
               belowBarData: BarAreaData(show: false),
             ),
           ],
