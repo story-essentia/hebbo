@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:hebbo/theme/app_theme.dart';
 
 class AboutHebboSheet extends StatelessWidget {
   const AboutHebboSheet({super.key});
@@ -19,7 +19,7 @@ class AboutHebboSheet extends StatelessWidget {
           children: [
             Text(
               'Scientific Basis',
-              style: GoogleFonts.plusJakartaSans(
+              style: AppTextStyles.plusJakarta(
                 color: const Color(0xFFEFDFFF),
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
@@ -28,7 +28,7 @@ class AboutHebboSheet extends StatelessWidget {
             const SizedBox(height: 24),
             Text(
               'Hebbo\'s training logic is based on well-established cognitive psychology paradigms. However, we make no claims that playing these games will cure or treat any medical condition.',
-              style: GoogleFonts.plusJakartaSans(
+              style: AppTextStyles.plusJakarta(
                 color: const Color(0xFFEFDFFF).withValues(alpha: 0.8),
                 fontSize: 14,
                 height: 1.5,
@@ -37,7 +37,7 @@ class AboutHebboSheet extends StatelessWidget {
             const SizedBox(height: 24),
             Text(
               'References:',
-              style: GoogleFonts.plusJakartaSans(
+              style: AppTextStyles.plusJakarta(
                 color: const Color(0xFFFF8AA7),
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
@@ -58,7 +58,7 @@ class AboutHebboSheet extends StatelessWidget {
                 onPressed: () => Navigator.of(context).pop(),
                 child: Text(
                   'Close',
-                  style: GoogleFonts.plusJakartaSans(
+                  style: AppTextStyles.plusJakarta(
                     color: const Color(0xFFEFDFFF),
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
@@ -83,7 +83,7 @@ class AboutHebboSheet extends StatelessWidget {
         Expanded(
           child: Text(
             text,
-            style: GoogleFonts.plusJakartaSans(
+            style: AppTextStyles.plusJakarta(
               color: const Color(0xFFEFDFFF).withValues(alpha: 0.7),
               fontSize: 12,
               height: 1.4,

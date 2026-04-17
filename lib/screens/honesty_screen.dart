@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:hebbo/theme/app_theme.dart';
 import 'package:hebbo/providers/database_provider.dart';
 import 'package:hebbo/screens/home_screen.dart';
 
@@ -20,7 +20,7 @@ class HonestyScreen extends ConsumerWidget {
             children: [
               Text(
                 'Welcome to Hebbo',
-                style: GoogleFonts.plusJakartaSans(
+                style: AppTextStyles.plusJakarta(
                   color: const Color(0xFFEFDFFF),
                   fontSize: 32,
                   fontWeight: FontWeight.bold,
@@ -71,7 +71,7 @@ class HonestyScreen extends ConsumerWidget {
                 ),
                 child: Text(
                   "Let's go",
-                  style: GoogleFonts.plusJakartaSans(
+                  style: AppTextStyles.plusJakarta(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
                   ),
@@ -93,7 +93,7 @@ class HonestyScreen extends ConsumerWidget {
         Expanded(
           child: Text(
             text,
-            style: GoogleFonts.plusJakartaSans(
+            style: AppTextStyles.plusJakarta(
               color: const Color(0xFFEFDFFF),
               fontSize: 16,
               height: 1.5,

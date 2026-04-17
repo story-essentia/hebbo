@@ -37,6 +37,9 @@ class FlankerSessionState {
   /// True when the game is manually paused by the user.
   final bool isPaused;
 
+  final bool isPersisted;
+  final String? saveError;
+
   const FlankerSessionState({
     this.trialsRemaining = 75,
     this.currentStimulus,
@@ -49,6 +52,8 @@ class FlankerSessionState {
     this.isWaitingForContinue = false,
     this.resetDurationMs = 500,
     this.isPaused = false,
+    this.isPersisted = true,
+    this.saveError,
   });
 
   FlankerSessionState copyWith({
@@ -63,6 +68,8 @@ class FlankerSessionState {
     bool? isWaitingForContinue,
     int? resetDurationMs,
     bool? isPaused,
+    bool? isPersisted,
+    String? saveError,
   }) {
     return FlankerSessionState(
       trialsRemaining: trialsRemaining ?? this.trialsRemaining,
@@ -76,6 +83,8 @@ class FlankerSessionState {
       isWaitingForContinue: isWaitingForContinue ?? this.isWaitingForContinue,
       resetDurationMs: resetDurationMs ?? this.resetDurationMs,
       isPaused: isPaused ?? this.isPaused,
+      isPersisted: isPersisted ?? this.isPersisted,
+      saveError: saveError ?? this.saveError,
     );
   }
 }
