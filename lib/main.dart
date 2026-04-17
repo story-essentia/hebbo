@@ -10,10 +10,11 @@ import 'package:hebbo/screens/home_screen.dart';
 import 'package:hebbo/screens/honesty_screen.dart';
 import 'package:hebbo/providers/database_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:hebbo/theme/app_theme.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
+  
   final database = HebboDatabase();
   final trialRepo = DriftTrialRepository(database);
   final sessionRepo = DriftSessionRepository(database);
@@ -45,6 +46,8 @@ void main() async {
   );
 }
 
+final scaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
+
 class HebboApp extends StatelessWidget {
   final bool hasSeenHonestyScreen;
 
@@ -53,14 +56,9 @@ class HebboApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      scaffoldMessengerKey: scaffoldMessengerKey,
       title: 'Hebbo',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: Colors.blue,
-          brightness: Brightness.dark,
-        ),
-        useMaterial3: true,
-      ),
+      theme: AppTheme.darkTheme,
       home: hasSeenHonestyScreen ? const HomeScreen() : const HonestyScreen(),
     );
   }

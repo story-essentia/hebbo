@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:hebbo/theme/app_theme.dart';
 import 'package:hebbo/providers/flanker_stats_provider.dart';
 import 'package:hebbo/screens/flanker_game_screen.dart';
 import 'package:hebbo/screens/progress_screen.dart';
@@ -45,7 +45,7 @@ class FlankerDetailSheet extends ConsumerWidget {
           // Title (Headline style)
           Text(
             'Flanker',
-            style: GoogleFonts.plusJakartaSans(
+            style: AppTextStyles.plusJakarta(
               color: const Color(0xFFEFDFFF),
               fontSize: 28,
               fontWeight: FontWeight.bold,
@@ -64,13 +64,13 @@ class FlankerDetailSheet extends ConsumerWidget {
             ),
             error: (err, stack) => Text(
               'Error loading statistics',
-              style: GoogleFonts.plusJakartaSans(color: Colors.red),
+              style: AppTextStyles.plusJakarta(color: Colors.red),
             ),
             data: (stats) {
               if (!stats.hasPlayedBefore) {
                 return Text(
                   'First session — we\'ll find your level',
-                  style: GoogleFonts.plusJakartaSans(
+                  style: AppTextStyles.plusJakarta(
                     color: const Color(0xFFEFDFFF).withValues(alpha: 0.5),
                     fontSize: 14,
                   ),
@@ -103,7 +103,7 @@ class FlankerDetailSheet extends ConsumerWidget {
           // Science Summary
           Text(
             'Trains selective attention and inhibitory control — your ability to focus on what matters and ignore what doesn\'t.',
-            style: GoogleFonts.plusJakartaSans(
+            style: AppTextStyles.plusJakarta(
               color: const Color(0xFFEFDFFF).withValues(alpha: 0.8),
               fontSize: 16,
               height: 1.5,
@@ -114,7 +114,7 @@ class FlankerDetailSheet extends ConsumerWidget {
           // Citation
           Text(
             'Based on Eriksen & Eriksen (1974)',
-            style: GoogleFonts.plusJakartaSans(
+            style: AppTextStyles.plusJakarta(
               color: const Color(0xFFEFDFFF).withValues(alpha: 0.6),
               fontSize: 12,
               fontStyle: FontStyle.italic,
@@ -156,7 +156,7 @@ class FlankerDetailSheet extends ConsumerWidget {
                   child: Center(
                     child: Text(
                       'Play',
-                      style: GoogleFonts.plusJakartaSans(
+                      style: AppTextStyles.plusJakarta(
                         color: Colors.white,
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
@@ -185,7 +185,7 @@ class FlankerDetailSheet extends ConsumerWidget {
                           },
                           child: Text(
                             'View your progress',
-                            style: GoogleFonts.plusJakartaSans(
+                            style: AppTextStyles.plusJakarta(
                               color: const Color(0xFFFF8AA7),
                               fontSize: 16,
                             ),

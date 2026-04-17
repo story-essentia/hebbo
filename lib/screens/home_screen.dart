@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:hebbo/theme/app_theme.dart';
 import 'package:hebbo/widgets/about_hebbo_sheet.dart';
 import 'package:hebbo/widgets/flanker_detail_sheet.dart';
 
@@ -27,7 +27,7 @@ class HomeScreen extends StatelessWidget {
             children: [
               Text(
                 'Training',
-                style: GoogleFonts.plusJakartaSans(
+                style: AppTextStyles.plusJakarta(
                   color: const Color(0xFFEFDFFF),
                   fontSize: 36,
                   fontWeight: FontWeight.bold,
@@ -70,7 +70,7 @@ class HomeScreen extends StatelessWidget {
                   },
                   child: Text(
                     'About Hebbo',
-                    style: GoogleFonts.plusJakartaSans(
+                    style: AppTextStyles.plusJakarta(
                       color: const Color(0xFFEFDFFF).withValues(alpha: 0.7),
                       fontSize: 16,
                       decoration: TextDecoration.underline,
@@ -124,7 +124,7 @@ class HomeScreen extends StatelessWidget {
               children: [
                 Text(
                   title,
-                  style: GoogleFonts.plusJakartaSans(
+                  style: AppTextStyles.plusJakarta(
                     color: isActive
                         ? const Color(0xFFEFDFFF)
                         : const Color(0xFFEFDFFF).withValues(alpha: 0.5),
@@ -135,7 +135,7 @@ class HomeScreen extends StatelessWidget {
                 const SizedBox(height: 4),
                 Text(
                   subtitle,
-                  style: GoogleFonts.plusJakartaSans(
+                  style: AppTextStyles.plusJakarta(
                     color: isActive
                         ? const Color(0xFFFF8AA7)
                         : const Color(0xFFEFDFFF).withValues(alpha: 0.4),

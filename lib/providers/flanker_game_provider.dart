@@ -10,6 +10,8 @@ import 'package:hebbo/repositories/i_trial_repository.dart';
 import 'package:hebbo/state/flanker_session_state.dart';
 import 'package:hebbo/providers/flanker_stats_provider.dart';
 import 'package:hebbo/providers/progress_provider.dart';
+import 'package:hebbo/database/error_handler.dart';
+import 'package:hebbo/providers/notification_provider.dart';
 
 final trialRepositoryProvider = Provider<ITrialRepository>((ref) {
   throw UnimplementedError('Initialize in main.dart');
@@ -253,43 +255,57 @@ class FlankerGameNotifier extends StateNotifier<FlankerSessionState> {
   }
 
   Future<void> _persistSession() async {
-    final sessions = await _sessionRepo.getAllSessions();
-    final nextSessionNum = sessions.length + 1;
+    try {
+      final sessions = await _sessionRepo.getAllSessions();
+      final nextSessionNum = sessions.length + 1;
 
-    final sessionId = await _sessionRepo.insertSession(
-      SessionEntity(
-        sessionNum: nextSessionNum,
-        startedAt: _sessionStartTime ?? DateTime.now(),
-        endedAt: DateTime.now(),
-        startingLevel: _initialLevel,
-        endingLevel: _adaptiveEngine.state.currentLevel,
-        environmentTier: 1,
-      ),
-    );
-
-    for (var i = 0; i < state.bufferedTrials.length; i++) {
-      final data = state.bufferedTrials[i];
-      await _trialRepo.insertTrial(
-        TrialEntity(
-          sessionId: sessionId,
-          trialNum: i + 1,
-          type: data['type'],
-          correct: data['correct'],
-          reactionMs: data['rt'],
-          difficulty: data['level'],
-          timestamp: DateTime.now(),
+      final sessionId = await _sessionRepo.insertSession(
+        SessionEntity(
+          sessionNum: nextSessionNum,
+          startedAt: _sessionStartTime ?? DateTime.now(),
+          endedAt: DateTime.now(),
+          startingLevel: _initialLevel,
+          endingLevel: _adaptiveEngine.state.currentLevel,
+          environmentTier: 1,
         ),
       );
+
+      for (var i = 0; i < state.bufferedTrials.length; i++) {
+        final data = state.bufferedTrials[i];
+        await _trialRepo.insertTrial(
+          TrialEntity(
+            sessionId: sessionId,
+            trialNum: i + 1,
+            type: data['type'],
+            correct: data['correct'],
+            reactionMs: data['rt'],
+            difficulty: data['level'],
+            timestamp: DateTime.now(),
+          ),
+        );
+      }
+
+      // Persist the final level to the difficulty repository for next game start
+      await _adaptiveEngine.save('flanker');
+
+      state = state.copyWith(isSessionComplete: true, isPersisted: true);
+
+      // Invalidate dependent stats providers so they show fresh data when user returns to home/progress
+      _ref.invalidate(flankerStatsProvider);
+      _ref.invalidate(progressProvider);
+    } catch (e) {
+      if (DatabaseErrorExtractor.isStorageFull(e)) {
+        // FR-005: Do not lose session state; FR-002: Notification
+        state = state.copyWith(
+          isSessionComplete: true,
+          isPersisted: false,
+          saveError: e.toString(),
+        );
+        NotificationService.showStorageFullError();
+      } else {
+        rethrow;
+      }
     }
-    
-    // Persist the final level to the difficulty repository for next game start
-    await _adaptiveEngine.save('flanker');
-
-    state = state.copyWith(isSessionComplete: true);
-
-    // Invalidate dependent stats providers so they show fresh data when user returns to home/progress
-    _ref.invalidate(flankerStatsProvider);
-    _ref.invalidate(progressProvider);
   }
 
   @override

@@ -1,7 +1,7 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:hebbo/theme/app_theme.dart';
 import 'package:hebbo/logic/flanker_domain.dart';
 import 'package:hebbo/providers/flanker_game_provider.dart';
 import 'package:hebbo/screens/session_end_placeholder.dart';
@@ -139,7 +139,7 @@ class _FlankerGameScreenState extends ConsumerState<FlankerGameScreen> {
                           Text(
                             'Paused',
                             textAlign: TextAlign.center,
-                            style: GoogleFonts.plusJakartaSans(
+                            style: AppTextStyles.plusJakarta(
                               color: const Color(0xFFEFDFFF),
                               fontSize: 32,
                               fontWeight: FontWeight.bold,
@@ -194,7 +194,7 @@ class _FlankerGameScreenState extends ConsumerState<FlankerGameScreen> {
       onPressed: onPressed,
       child: Text(
         label,
-        style: GoogleFonts.plusJakartaSans(
+        style: AppTextStyles.plusJakarta(
           fontSize: 16,
           fontWeight: FontWeight.bold,
         ),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:hebbo/theme/app_theme.dart';
+import 'package:hebbo/providers/flanker_game_provider.dart';
 import 'package:hebbo/screens/flanker_game_screen.dart';
 import 'package:hebbo/screens/progress_screen.dart';
 import 'package:hebbo/providers/adaptive_engine_provider.dart';
@@ -8,75 +9,144 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 class SessionEndPlaceholder extends ConsumerWidget {
   const SessionEndPlaceholder({super.key});
 
+  Future<bool> _showExitConfirmation(BuildContext context) async {
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: const Color(0xFF301A4D),
+        title: Text(
+          'Unsaved Data Detected',
+          style: AppTextStyles.plusJakarta(
+            color: const Color(0xFFEFDFFF),
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        content: Text(
+          'Your session data could not be saved due to storage issues. Navigating away will discard this session permanently.',
+          style: AppTextStyles.plusJakarta(color: const Color(0xFFEFDFFF)),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text(
+              'Stay',
+              style: AppTextStyles.plusJakarta(
+                color: const Color(0xFFFF8AA7),
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: Text(
+              'Discard & Exit',
+              style: AppTextStyles.plusJakarta(color: Colors.grey),
+            ),
+          ),
+        ],
+      ),
+    );
+    return result ?? false;
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final currentLevel = ref.watch(adaptiveEngineProvider).currentLevel;
+    final isPersisted = ref.watch(flankerGameProvider).isPersisted;
 
-    return Scaffold(
-      backgroundColor: const Color(0xFF150629),
-      body: SafeArea(
-        child: Center(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 32.0),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Text(
-                  'Session Complete!',
-                  textAlign: TextAlign.center,
-                  style: GoogleFonts.plusJakartaSans(
-                    color: const Color(0xFFEFDFFF),
-                    fontSize: 32,
-                    fontWeight: FontWeight.bold,
+    return PopScope(
+      canPop: isPersisted,
+      onPopInvoked: (didPop) async {
+        if (didPop) return;
+        final shouldPop = await _showExitConfirmation(context);
+        if (shouldPop && context.mounted) {
+          Navigator.popUntil(context, (route) => route.isFirst);
+        }
+      },
+      child: Scaffold(
+        backgroundColor: const Color(0xFF150629),
+        body: SafeArea(
+          child: Center(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 32.0),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Text(
+                    'Session Complete!',
+                    textAlign: TextAlign.center,
+                    style: AppTextStyles.plusJakarta(
+                      color: const Color(0xFFEFDFFF),
+                      fontSize: 32,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'Level Reached: $currentLevel',
-                  textAlign: TextAlign.center,
-                  style: GoogleFonts.plusJakartaSans(
-                    color: const Color(0xFFFF8AA7),
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
+                  const SizedBox(height: 8),
+                  Text(
+                    'Level Reached: $currentLevel',
+                    textAlign: TextAlign.center,
+                    style: AppTextStyles.plusJakarta(
+                      color: const Color(0xFFFF8AA7),
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 48),
-                _buildButton(
-                  context: context,
-                  label: 'Play again',
-                  isPrimary: true,
-                  onPressed: () {
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => const FlankerGameScreen(),
-                      ),
-                    );
-                  },
-                ),
-                const SizedBox(height: 16),
-                _buildButton(
-                  context: context,
-                  label: 'See progress',
-                  isPrimary: false,
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (_) => const ProgressScreen()),
-                    );
-                  },
-                ),
-                const SizedBox(height: 16),
-                _buildButton(
-                  context: context,
-                  label: 'Back to menu',
-                  isPrimary: false,
-                  onPressed: () {
-                    Navigator.popUntil(context, (route) => route.isFirst);
-                  },
-                ),
-              ],
+                  const SizedBox(height: 48),
+                  _buildButton(
+                    context: context,
+                    label: 'Play again',
+                    isPrimary: true,
+                    onPressed: () async {
+                      if (!isPersisted) {
+                        final shouldExit = await _showExitConfirmation(context);
+                        if (!shouldExit) return;
+                      }
+                      if (context.mounted) {
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const FlankerGameScreen(),
+                          ),
+                        );
+                      }
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  _buildButton(
+                    context: context,
+                    label: 'See progress',
+                    isPrimary: false,
+                    onPressed: () async {
+                      if (!isPersisted) {
+                        final shouldExit = await _showExitConfirmation(context);
+                        if (!shouldExit) return;
+                      }
+                      if (context.mounted) {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (_) => const ProgressScreen()),
+                        );
+                      }
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  _buildButton(
+                    context: context,
+                    label: 'Back to menu',
+                    isPrimary: false,
+                    onPressed: () async {
+                      if (!isPersisted) {
+                        final shouldExit = await _showExitConfirmation(context);
+                        if (!shouldExit) return;
+                      }
+                      if (context.mounted) {
+                        Navigator.popUntil(context, (route) => route.isFirst);
+                      }
+                    },
+                  ),
+                ],
+              ),
             ),
           ),
         ),
@@ -105,7 +175,7 @@ class SessionEndPlaceholder extends ConsumerWidget {
       onPressed: onPressed,
       child: Text(
         label,
-        style: GoogleFonts.plusJakartaSans(
+        style: AppTextStyles.plusJakarta(
           fontSize: 16,
           fontWeight: FontWeight.bold,
         ),
