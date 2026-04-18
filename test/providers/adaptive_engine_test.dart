@@ -19,12 +19,13 @@ void main() {
   });
 
   group('AdaptiveEngineNotifier - Level Up Logic', () {
-    test('Should increment level after 20 correct trials (80%+ accuracy)', () async {
+    test('Should increment level after 20 correct trials (80%+ accuracy) with fast RT', () async {
       await notifier.load('test_game');
       
-      // Submit 20 correct trials
+      // Submit 20 correct trials with very fast RT (100ms) to ensure Level Up trigger
+      // ISI for L1 is 1500ms, ISI for L2 is 1300ms. 100ms < 1300ms.
       for (int i = 0; i < 20; i++) {
-        notifier.reportTrial(true);
+        notifier.reportTrial(true, 100);
       }
 
       expect(notifier.state.currentLevel, 2);
@@ -36,7 +37,7 @@ void main() {
       await notifier.load('test_game');
 
       for (int i = 0; i < 19; i++) {
-        notifier.reportTrial(true);
+        notifier.reportTrial(true, 500);
       }
 
       expect(notifier.state.currentLevel, 1);
@@ -46,8 +47,8 @@ void main() {
     test('Should NOT increment level if accuracy is below 80% (e.g., 15/20 = 75%)', () async {
       await notifier.load('test_game');
 
-      for (int i = 0; i < 5; i++) { notifier.reportTrial(false); }
-      for (int i = 0; i < 15; i++) { notifier.reportTrial(true); }
+      for (int i = 0; i < 5; i++) { notifier.reportTrial(false, 500); }
+      for (int i = 0; i < 15; i++) { notifier.reportTrial(true, 500); }
 
       expect(notifier.state.currentLevel, 1);
       expect(notifier.state.upWindow.length, 20);
@@ -61,8 +62,8 @@ void main() {
       await notifier.load('test_game');
 
       // 5 correct, 5 incorrect (50% accuracy)
-      for (int i = 0; i < 5; i++) { notifier.reportTrial(true); }
-      for (int i = 0; i < 5; i++) { notifier.reportTrial(false); }
+      for (int i = 0; i < 5; i++) { notifier.reportTrial(true, 500); }
+      for (int i = 0; i < 5; i++) { notifier.reportTrial(false, 500); }
 
       expect(notifier.state.currentLevel, 1);
       expect(notifier.state.upWindow.isEmpty, true);
@@ -74,8 +75,8 @@ void main() {
       await notifier.load('test_game');
 
       // 7 incorrect, then 3 correct (30% accuracy, but last is correct)
-      for (int i = 0; i < 7; i++) { notifier.reportTrial(false); }
-      for (int i = 0; i < 3; i++) { notifier.reportTrial(true); }
+      for (int i = 0; i < 7; i++) { notifier.reportTrial(false, 500); }
+      for (int i = 0; i < 3; i++) { notifier.reportTrial(true, 500); }
 
       expect(notifier.state.currentLevel, 2);
       expect(notifier.state.downWindow.length, 10);
@@ -84,7 +85,7 @@ void main() {
     test('Should NOT decrement below 1', () async {
       await notifier.load('test_game'); // Level 1
 
-      for (int i = 0; i < 10; i++) { notifier.reportTrial(false); }
+      for (int i = 0; i < 10; i++) { notifier.reportTrial(false, 500); }
 
       expect(notifier.state.currentLevel, 1);
       expect(notifier.state.upWindow.isEmpty, true); // Still resets windows
@@ -96,7 +97,7 @@ void main() {
       await notifier.load('test_game');
       
       // Level up to 2
-      for (int i = 0; i < 20; i++) { notifier.reportTrial(true); }
+      for (int i = 0; i < 20; i++) { notifier.reportTrial(true, 100); }
       
       await notifier.save('test_game');
       

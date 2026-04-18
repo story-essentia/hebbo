@@ -259,14 +259,19 @@ class FlankerGameNotifier extends StateNotifier<FlankerSessionState> {
       final sessions = await _sessionRepo.getAllSessions();
       final nextSessionNum = sessions.length + 1;
 
+      final endingLevel = _adaptiveEngine.state.currentLevel;
+      int environmentTier = 1;
+      if (endingLevel >= 4 && endingLevel <= 7) environmentTier = 2;
+      if (endingLevel >= 8) environmentTier = 3;
+
       final sessionId = await _sessionRepo.insertSession(
         SessionEntity(
           sessionNum: nextSessionNum,
           startedAt: _sessionStartTime ?? DateTime.now(),
           endedAt: DateTime.now(),
           startingLevel: _initialLevel,
-          endingLevel: _adaptiveEngine.state.currentLevel,
-          environmentTier: 1,
+          endingLevel: endingLevel,
+          environmentTier: environmentTier,
         ),
       );
 

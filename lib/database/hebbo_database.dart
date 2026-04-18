@@ -142,7 +142,7 @@ class HebboDatabase extends _$HebboDatabase {
               .add(const Duration(minutes: 5)),
           startingLevel: difficulty == 1 ? 1 : difficulty - 1,
           endingLevel: difficulty,
-          environmentTier: difficulty < 4 ? 1 : (difficulty < 7 ? 2 : 3),
+          environmentTier: difficulty < 4 ? 1 : (difficulty < 8 ? 2 : 3),
         ),
       );
 

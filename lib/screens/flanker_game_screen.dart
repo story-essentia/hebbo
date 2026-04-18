@@ -7,6 +7,9 @@ import 'package:hebbo/providers/flanker_game_provider.dart';
 import 'package:hebbo/screens/session_end_placeholder.dart';
 import 'package:hebbo/providers/adaptive_engine_provider.dart';
 import 'package:hebbo/widgets/fish_row_widget.dart';
+import 'package:hebbo/widgets/backgrounds/environment_factory.dart';
+import 'package:hebbo/widgets/backgrounds/animated_background_wrapper.dart';
+import 'package:hebbo/widgets/backgrounds/environment_transitioner.dart';
 
 class FlankerGameScreen extends ConsumerStatefulWidget {
   const FlankerGameScreen({super.key});
@@ -30,6 +33,7 @@ class _FlankerGameScreenState extends ConsumerState<FlankerGameScreen> {
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(flankerGameProvider);
+    final level = ref.watch(adaptiveEngineProvider).currentLevel;
 
     ref.listen(flankerGameProvider.select((s) => s.isSessionComplete),
         (previous, next) {
@@ -45,6 +49,13 @@ class _FlankerGameScreenState extends ConsumerState<FlankerGameScreen> {
       backgroundColor: Colors.black,
       body: Stack(
         children: [
+          // Environment Background
+          AnimatedBackgroundWrapper(
+            isResetting: state.isResetting,
+            isPaused: state.isPaused,
+            child: EnvironmentTransitioner(level: level),
+          ),
+
           // Stimuli Layout
           Center(
             child: Opacity(
@@ -190,7 +201,7 @@ class _FlankerGameScreenState extends ConsumerState<FlankerGameScreen> {
           borderRadius: BorderRadius.circular(48),
         ),
         elevation: 0,
-      ),
+       ),
       onPressed: onPressed,
       child: Text(
         label,

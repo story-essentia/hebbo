@@ -42,9 +42,9 @@ class ProgressNotifier extends AsyncNotifier<ProgressState> {
     final totalSessions = await db.getTotalSessionsCompleted();
 
     final tierInt = await db.getMostRecentEnvironmentTier() ?? 1;
-    String envName = "Shallow reef";
-    if (tierInt == 2) envName = "Open ocean";
-    if (tierInt >= 3) envName = "Deep sea";
+    String envName = "Shallow Reef";
+    if (tierInt == 2) envName = "Open Ocean";
+    if (tierInt >= 3) envName = "Deep Sea";
 
     final metrics = ProgressMetrics(
       personalBestRtMs: pbRt,
