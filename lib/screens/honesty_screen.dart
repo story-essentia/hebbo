@@ -30,7 +30,7 @@ class HonestyScreen extends ConsumerWidget {
               const Spacer(),
               _buildFact(
                 icon: Icons.science_outlined,
-                text: '3 games. All independently researched.',
+                text: 'All games based on independent research.',
               ),
               const SizedBox(height: 24),
               _buildFact(

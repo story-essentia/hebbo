@@ -10,6 +10,7 @@ import 'package:hebbo/widgets/fish_row_widget.dart';
 import 'package:hebbo/widgets/backgrounds/environment_factory.dart';
 import 'package:hebbo/widgets/backgrounds/animated_background_wrapper.dart';
 import 'package:hebbo/widgets/backgrounds/environment_transitioner.dart';
+import 'package:hebbo/providers/audio_provider.dart';
 
 class FlankerGameScreen extends ConsumerStatefulWidget {
   const FlankerGameScreen({super.key});
@@ -27,7 +28,18 @@ class _FlankerGameScreenState extends ConsumerState<FlankerGameScreen> {
       await notifier.load('flanker');
       final startLevel = ref.read(adaptiveEngineProvider).currentLevel;
       ref.read(flankerGameProvider.notifier).startSession(startLevel);
+      ref.read(gameAudioProvider).startSessionAmbience();
     });
+  }
+
+  @override
+  void dispose() {
+    // Only stop session audio if we haven't reached the completion screen.
+    // If session is complete, SessionEndPlaceholder will handle the stop signal.
+    if (!ref.read(flankerGameProvider).isSessionComplete) {
+      ref.read(gameAudioProvider).stopSessionAudio();
+    }
+    super.dispose();
   }
 
   @override
@@ -42,6 +54,23 @@ class _FlankerGameScreenState extends ConsumerState<FlankerGameScreen> {
           context,
           MaterialPageRoute(builder: (_) => const SessionEndPlaceholder()),
         );
+      }
+    });
+
+    // Handle Ambience Pause/Resume
+    ref.listen(flankerGameProvider.select((s) => s.isPaused), (previous, next) {
+      if (next) {
+        ref.read(gameAudioProvider).pauseAmbience();
+      } else if (previous == true && next == false) {
+        ref.read(gameAudioProvider).resumeAmbience();
+      }
+    });
+
+    // Handle Level Up SFX
+    ref.listen(adaptiveEngineProvider.select((s) => s.currentLevel),
+        (previous, next) {
+      if (previous != null && next > previous) {
+        ref.read(gameAudioProvider).playLevelUp();
       }
     });
 

@@ -5,9 +5,22 @@ import 'package:hebbo/screens/flanker_game_screen.dart';
 import 'package:hebbo/screens/progress_screen.dart';
 import 'package:hebbo/providers/adaptive_engine_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hebbo/providers/audio_provider.dart';
 
-class SessionEndPlaceholder extends ConsumerWidget {
+class SessionEndPlaceholder extends ConsumerStatefulWidget {
   const SessionEndPlaceholder({super.key});
+
+  @override
+  ConsumerState<SessionEndPlaceholder> createState() => _SessionEndPlaceholderState();
+}
+
+class _SessionEndPlaceholderState extends ConsumerState<SessionEndPlaceholder> {
+
+  @override
+  void dispose() {
+    ref.read(gameAudioProvider).stopSessionAudio();
+    super.dispose();
+  }
 
   Future<bool> _showExitConfirmation(BuildContext context) async {
     final result = await showDialog<bool>(
@@ -50,7 +63,7 @@ class SessionEndPlaceholder extends ConsumerWidget {
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final currentLevel = ref.watch(adaptiveEngineProvider).currentLevel;
     final isPersisted = ref.watch(flankerGameProvider).isPersisted;
 
@@ -102,6 +115,10 @@ class SessionEndPlaceholder extends ConsumerWidget {
                         final shouldExit = await _showExitConfirmation(context);
                         if (!shouldExit) return;
                       }
+                      
+                      // Stop and start again for clean session restart
+                      await ref.read(gameAudioProvider).stopSessionAudio();
+                      
                       if (context.mounted) {
                         Navigator.pushReplacement(
                           context,
@@ -122,6 +139,10 @@ class SessionEndPlaceholder extends ConsumerWidget {
                         final shouldExit = await _showExitConfirmation(context);
                         if (!shouldExit) return;
                       }
+                      
+                      // Explicitly stop audio when navigating to progress
+                      ref.read(gameAudioProvider).stopSessionAudio();
+                      
                       if (context.mounted) {
                         Navigator.push(
                           context,
@@ -140,6 +161,10 @@ class SessionEndPlaceholder extends ConsumerWidget {
                         final shouldExit = await _showExitConfirmation(context);
                         if (!shouldExit) return;
                       }
+
+                      // Explicitly stop audio when returning to menu
+                      ref.read(gameAudioProvider).stopSessionAudio();
+
                       if (context.mounted) {
                         Navigator.popUntil(context, (route) => route.isFirst);
                       }
