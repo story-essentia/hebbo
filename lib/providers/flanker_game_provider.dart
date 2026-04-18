@@ -12,6 +12,7 @@ import 'package:hebbo/providers/flanker_stats_provider.dart';
 import 'package:hebbo/providers/progress_provider.dart';
 import 'package:hebbo/database/error_handler.dart';
 import 'package:hebbo/providers/notification_provider.dart';
+import 'package:hebbo/providers/audio_provider.dart';
 
 final trialRepositoryProvider = Provider<ITrialRepository>((ref) {
   throw UnimplementedError('Initialize in main.dart');
@@ -258,6 +259,9 @@ class FlankerGameNotifier extends StateNotifier<FlankerSessionState> {
     try {
       final sessions = await _sessionRepo.getAllSessions();
       final nextSessionNum = sessions.length + 1;
+      
+      // Play completion sound
+      unawaited(_ref.read(gameAudioProvider).playSessionComplete());
 
       final endingLevel = _adaptiveEngine.state.currentLevel;
       int environmentTier = 1;

@@ -1,6 +1,6 @@
 # hebbo Development Guidelines
 
-Auto-generated from all feature plans. Last updated: 2026-04-17
+Auto-generated from all feature plans. Last updated: 2026-04-18
 
 ## Active Technologies
 - Flutter 3.x, Dart 3.x + `flutter_riverpod` (state), `drift` (persistence), `test` (unit verification) (002-adaptive-difficulty-engine)
@@ -37,7 +37,6 @@ Flutter 3.x, Dart 3.x: Follow standard conventions
 ## Recent Changes
 - 009-dynamic-environments: Added Flutter / Dart + `flutter_riverpod` (state management)
 - 008-storage-full-handling: Added Dart / Flutter + Drift (sqlite), flutter_riverpod, google_fonts
-- 007-game-detail-sheet: Added Flutter (Dart) + `flutter_riverpod`, `drift` (SQLite), `shimmer`, `google_fonts`
 
 
 <!-- MANUAL ADDITIONS START -->
