@@ -129,6 +129,11 @@ class _AnimatedFishState extends State<AnimatedFish>
 
   late final AnimationController _topDownWiggleCtrl;
 
+  // ── Shake controller for wrong feedback ────────────────────────────────────
+
+  late final AnimationController _shakeCtrl;
+  late final Animation<double> _shakeValue;
+
   // ── Particles / Currents ───────────────────────────────────────────────────
 
   final _rng = math.Random();
@@ -216,6 +221,21 @@ class _AnimatedFishState extends State<AnimatedFish>
       duration: const Duration(milliseconds: 600),
     )..repeat(reverse: true);
 
+    // Wrong feedback shake: 400ms rapid oscillation
+    _shakeCtrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 300),
+    );
+    _shakeValue = TweenSequence<double>([
+      TweenSequenceItem(tween: Tween(begin: 0.0, end: 15.0), weight: 1),
+      TweenSequenceItem(tween: Tween(begin: 15.0, end: -15.0), weight: 1),
+      TweenSequenceItem(tween: Tween(begin: -15.0, end: 12.0), weight: 1),
+      TweenSequenceItem(tween: Tween(begin: 12.0, end: -12.0), weight: 1),
+      TweenSequenceItem(tween: Tween(begin: -12.0, end: 8.0), weight: 1),
+      TweenSequenceItem(tween: Tween(begin: 8.0, end: -8.0), weight: 1),
+      TweenSequenceItem(tween: Tween(begin: -8.0, end: 0.0), weight: 1),
+    ]).animate(CurvedAnimation(parent: _shakeCtrl, curve: Curves.linear));
+
     _ticker = createTicker(_onTick)..start();
 
     _updateGlow();
@@ -298,6 +318,12 @@ class _AnimatedFishState extends State<AnimatedFish>
       }
       _updateGlow();
       _updateView();
+
+      // Trigger shake on wrong response
+      if (widget.currentState == FishState.swimLeftWrong || 
+          widget.currentState == FishState.swimRightWrong) {
+        _shakeCtrl.forward(from: 0);
+      }
     }
   }
 
@@ -335,6 +361,7 @@ class _AnimatedFishState extends State<AnimatedFish>
     _dashCtrl.dispose();
     _topDownWiggleCtrl.dispose();
     _ticker.dispose();
+    _shakeCtrl.dispose();
     super.dispose();
   }
 
@@ -353,20 +380,23 @@ class _AnimatedFishState extends State<AnimatedFish>
         _topDownWiggleCtrl,
       ]),
       builder: (context, child) {
-        return CustomPaint(
-          size: const Size(300, 300),
-          painter: _FishPainter(
-            state: widget.currentState,
-            tailAngle: _tailAngle.value,
-            bodyAngle: _bodyAngle.value,
-            rippleProgress: _rippleCtrl.value,
-            glowValue: _glowValue.value,
-            bubbles: List.unmodifiable(_bubbles),
-            streaks: List.unmodifiable(_streaks),
-            viewTransition: _viewValue.value,
-            dashValue: _dashValue.value,
-            topDownWiggle: _topDownWiggleCtrl.value,
-            lastFacingRight: _lastFacingRight,
+        return Transform.translate(
+          offset: Offset(_shakeValue.value, 0),
+          child: CustomPaint(
+            size: const Size(300, 300),
+            painter: _FishPainter(
+              state: widget.currentState,
+              tailAngle: _tailAngle.value,
+              bodyAngle: _bodyAngle.value,
+              rippleProgress: _rippleCtrl.value,
+              glowValue: _glowValue.value,
+              bubbles: List.unmodifiable(_bubbles),
+              streaks: List.unmodifiable(_streaks),
+              viewTransition: _viewValue.value,
+              dashValue: _dashValue.value,
+              topDownWiggle: _topDownWiggleCtrl.value,
+              lastFacingRight: _lastFacingRight,
+            ),
           ),
         );
       },

@@ -22,11 +22,19 @@ void main() async {
 
   final sharedPreferences = await SharedPreferences.getInstance();
 
-  final hasRunDevCleanup =
-      sharedPreferences.getBool('has_run_dev_cleanup') ?? false;
-  if (!hasRunDevCleanup) {
-    await database.cleanupDevelopmentData();
-    await sharedPreferences.setBool('has_run_dev_cleanup', true);
+  final hasRunFinalCleanup =
+      sharedPreferences.getBool('has_run_final_cleanup') ?? false;
+  if (!hasRunFinalCleanup) {
+    await database.clearAllData();
+    await sharedPreferences.setBool('has_run_final_cleanup', true);
+  }
+
+  // One-time repair for session numbers
+  final hasRunRepair =
+      sharedPreferences.getBool('has_run_session_repair_v1') ?? false;
+  if (!hasRunRepair) {
+    await database.repairSessionNumbers();
+    await sharedPreferences.setBool('has_run_session_repair_v1', true);
   }
 
   final hasSeenHonestyScreen =

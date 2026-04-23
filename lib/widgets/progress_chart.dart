@@ -18,14 +18,8 @@ class ProgressChart extends StatelessWidget {
       );
     }
 
-    final double rawMinRt = _getMinRt();
-    final double rawMaxRt = _getMaxRt();
-
-    final double yMinCalc = ((rawMinRt / 50).floor() * 50.0) - 50.0;
-    final double yMaxCalc = ((rawMaxRt / 50).ceil() * 50.0) + 50.0;
-
-    final double yMin = yMinCalc < 0 ? 0 : yMinCalc;
-    final double yMax = yMaxCalc <= yMin ? yMin + 100 : yMaxCalc;
+    final double yMin = 0;
+    final double yMax = 1500;
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 24.0),
@@ -43,7 +37,6 @@ class ProgressChart extends StatelessWidget {
                   );
                   
                   if (spot.barIndex == 2) {
-                    // Logic to reverse the scaling and show the actual level
                     double ratio = (spot.y - yMin) / (yMax - yMin);
                     int level = (ratio * 9).round() + 1;
                     return LineTooltipItem('Lvl: $level', textStyle);
@@ -61,7 +54,8 @@ class ProgressChart extends StatelessWidget {
           lineBarsData: [
             LineChartBarData(
               spots: data
-                  .map((d) => FlSpot(d.sessionNum.toDouble(), d.avgCongruentRt))
+                  .where((d) => d.metricARt > 0)
+                  .map((d) => FlSpot(d.sessionNum.toDouble(), d.metricARt))
                   .toList(),
               isCurved: true,
               color: const Color(0xFFFF8AA7),
@@ -72,8 +66,9 @@ class ProgressChart extends StatelessWidget {
             ),
             LineChartBarData(
               spots: data
+                  .where((d) => d.metricBRt > 0)
                   .map(
-                    (d) => FlSpot(d.sessionNum.toDouble(), d.avgIncongruentRt),
+                    (d) => FlSpot(d.sessionNum.toDouble(), d.metricBRt),
                   )
                   .toList(),
               isCurved: true,
@@ -87,7 +82,6 @@ class ProgressChart extends StatelessWidget {
             LineChartBarData(
               isStepLineChart: true,
               spots: data.map((d) {
-                // Map difficulty 1..10 to the yMin..yMax range of the RT axis
                 final double diffFactor =
                     (d.endingDifficulty.clamp(1, 10) - 1) / 9.0;
                 final double scaled = yMin + (diffFactor * (yMax - yMin));
@@ -104,7 +98,7 @@ class ProgressChart extends StatelessWidget {
               sideTitles: SideTitles(
                 showTitles: true,
                 reservedSize: 40,
-                interval: 50,
+                interval: 250,
                 getTitlesWidget: (value, meta) {
                   return Text(
                     '${value.toInt()}',
@@ -125,25 +119,29 @@ class ProgressChart extends StatelessWidget {
               sideTitles: SideTitles(
                 showTitles: true,
                 reservedSize: 30,
+                // Force 10 titles (1 to 10)
                 interval: (yMax - yMin) / 9,
                 getTitlesWidget: (value, meta) {
-                  // The interval is exactly (yMax - yMin) / 9, so fl_chart calls this at 10 ticks.
-                  // We map those ticks directly to 1..10.
-                  double ratio = (value - yMin) / (yMax - yMin);
-                  int level = (ratio * 9).round() + 1;
+                  // We want to show labels for indices 0..9 corresponding to levels 1..10
+                  // Logic: for each possible level, find the Y value.
+                  // Since fl_chart calls this for many values, we check which level 'value' represents.
                   
-                  if (level < 1 || level > 10) return const SizedBox();
-
-                  return Padding(
-                    padding: const EdgeInsets.only(left: 8.0),
-                    child: Text(
-                      '$level',
-                      style: const TextStyle(
-                        fontSize: 10,
-                        color: Color(0xFFb7a3cf),
-                      ),
-                    ),
-                  );
+                  for (int i = 0; i < 10; i++) {
+                    double targetY = yMin + i * (yMax - yMin) / 9;
+                    if ((value - targetY).abs() < (yMax - yMin) / 20) {
+                      return Padding(
+                        padding: const EdgeInsets.only(left: 8.0),
+                        child: Text(
+                          '${i + 1}',
+                          style: const TextStyle(
+                            fontSize: 10,
+                            color: Color(0xFFb7a3cf),
+                          ),
+                        ),
+                      );
+                    }
+                  }
+                  return const SizedBox();
                 },
               ),
               axisNameWidget: const Text(
@@ -201,27 +199,5 @@ class ProgressChart extends StatelessWidget {
         ),
       ),
     );
-  }
-
-  double _getMinRt() {
-    double minVal = double.infinity;
-    for (var d in data) {
-      if (d.avgCongruentRt < minVal && d.avgCongruentRt > 0) {
-        minVal = d.avgCongruentRt;
-      }
-      if (d.avgIncongruentRt < minVal && d.avgIncongruentRt > 0) {
-        minVal = d.avgIncongruentRt;
-      }
-    }
-    return minVal == double.infinity ? 0 : minVal;
-  }
-
-  double _getMaxRt() {
-    double maxVal = 0;
-    for (var d in data) {
-      if (d.avgCongruentRt > maxVal) maxVal = d.avgCongruentRt;
-      if (d.avgIncongruentRt > maxVal) maxVal = d.avgIncongruentRt;
-    }
-    return maxVal == 0 ? 100 : maxVal;
   }
 }

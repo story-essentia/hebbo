@@ -1,6 +1,6 @@
 # hebbo Development Guidelines
 
-Auto-generated from all feature plans. Last updated: 2026-04-18
+Auto-generated from all feature plans. Last updated: 2026-04-22
 
 ## Active Technologies
 - Flutter 3.x, Dart 3.x + `flutter_riverpod` (state), `drift` (persistence), `test` (unit verification) (002-adaptive-difficulty-engine)
@@ -16,6 +16,8 @@ Auto-generated from all feature plans. Last updated: 2026-04-18
 - On-device SQLite (Drift), No remote sync for MVP. (008-storage-full-handling)
 - Flutter / Dart + `flutter_riverpod` (state management) (009-dynamic-environments)
 - Drift (On-device Only) (009-dynamic-environments)
+- Dart 3.x / Flutter 3.x + `flutter_riverpod`, `just_audio`, `drift`, `audio_session` (011-task-switching)
+- Drift (SQLite) on-device persistence (011-task-switching)
 
 - Flutter 3.x, Dart 3.x + `drift`, `sqlite3_flutter_libs`, `path_provider`, `path`, `drift_dev` (dev), `build_runner` (dev) (001-scaffold-local-storage)
 
@@ -35,6 +37,7 @@ tests/
 Flutter 3.x, Dart 3.x: Follow standard conventions
 
 ## Recent Changes
+- 011-task-switching: Added Dart 3.x / Flutter 3.x + `flutter_riverpod`, `just_audio`, `drift`, `audio_session`
 - 009-dynamic-environments: Added Flutter / Dart + `flutter_riverpod` (state management)
 - 008-storage-full-handling: Added Dart / Flutter + Drift (sqlite), flutter_riverpod, google_fonts
 

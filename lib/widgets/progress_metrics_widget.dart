@@ -25,12 +25,13 @@ class ProgressMetricsWidget extends StatelessWidget {
             "${metrics.totalSessionsCompleted}",
             Icons.check_circle_outline,
           ),
-          _buildCard(
-            context,
-            "Environment",
-            metrics.currentEnvironmentTier,
-            Icons.water,
-          ),
+          if (metrics.currentEnvironmentTier != null)
+            _buildCard(
+              context,
+              "Environment",
+              metrics.currentEnvironmentTier!,
+              Icons.water,
+            ),
         ],
       ),
     );

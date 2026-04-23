@@ -6,10 +6,12 @@ class ProgressState {
   final ProgressMetrics metrics;
   final List<SessionChartData> chartData;
   final bool showAllTime;
+  final String gameId;
 
   ProgressState({
     required this.metrics,
     required this.chartData,
+    required this.gameId,
     this.showAllTime = false,
   });
 
@@ -22,37 +24,46 @@ class ProgressState {
       metrics: metrics ?? this.metrics,
       chartData: chartData ?? this.chartData,
       showAllTime: showAllTime ?? this.showAllTime,
+      gameId: gameId,
     );
   }
 }
 
-class ProgressNotifier extends AsyncNotifier<ProgressState> {
+class ProgressNotifier extends FamilyAsyncNotifier<ProgressState, String> {
   @override
-  Future<ProgressState> build() async {
-    return _fetchData(false);
+  Future<ProgressState> build(String arg) async {
+    return _fetchData(arg, false);
   }
 
-  Future<ProgressState> _fetchData(bool showAllTime) async {
+  Future<ProgressState> _fetchData(String gameId, bool showAllTime) async {
     final db = ref.read(databaseProvider);
 
-    // Development only: Seed test data so user doesn't have to play 75 trials
-    await db.seedMockSessions();
+    // Mock data seeding removed as requested
 
-    final pbRt = await db.getPersonalBestRt() ?? 0;
-    final totalSessions = await db.getTotalSessionsCompleted();
+    final pbRt = await db.getPersonalBestRt(gameId) ?? 0;
+    final totalSessions = await db.getTotalSessionsCompleted(gameId);
 
-    final tierInt = await db.getMostRecentEnvironmentTier() ?? 1;
-    String envName = "Shallow Reef";
-    if (tierInt == 2) envName = "Open Ocean";
-    if (tierInt >= 3) envName = "Deep Sea";
+    ProgressMetrics metrics;
+    if (gameId == 'flanker') {
+      final tierInt = await db.getMostRecentEnvironmentTier() ?? 1;
+      String envName = "Shallow Reef";
+      if (tierInt == 2) envName = "Open Ocean";
+      if (tierInt >= 3) envName = "Deep Sea";
+      
+      metrics = ProgressMetrics(
+        personalBestRtMs: pbRt,
+        totalSessionsCompleted: totalSessions,
+        currentEnvironmentTier: envName,
+      );
+    } else {
+      metrics = ProgressMetrics(
+        personalBestRtMs: pbRt,
+        totalSessionsCompleted: totalSessions,
+        rewardLabel: "Electric Nocturne",
+      );
+    }
 
-    final metrics = ProgressMetrics(
-      personalBestRtMs: pbRt,
-      totalSessionsCompleted: totalSessions,
-      currentEnvironmentTier: envName,
-    );
-
-    final rawData = await db.getSessionChartData();
+    final rawData = await db.getSessionChartData(gameId);
     var displayData = rawData;
 
     if (!showAllTime && displayData.length > 10) {
@@ -63,24 +74,18 @@ class ProgressNotifier extends AsyncNotifier<ProgressState> {
       metrics: metrics,
       chartData: displayData,
       showAllTime: showAllTime,
+      gameId: gameId,
     );
   }
 
   Future<void> toggleViewMode() async {
     if (state.value == null) return;
-
-    final newShowAllTime = !state.value!.showAllTime;
-
-    // We could either filter in-memory or refetch.
-    // Since we need to slice differently based on limit, refetching is safest,
-    // or just re-slice the full list if we kept it. Re-fetching is very cheap here.
+    final currentState = state.value!;
     state = const AsyncValue.loading();
-    state = await AsyncValue.guard(() => _fetchData(newShowAllTime));
+    state = await AsyncValue.guard(() => _fetchData(arg, !currentState.showAllTime));
   }
 }
 
-final progressProvider = AsyncNotifierProvider<ProgressNotifier, ProgressState>(
-  () {
-    return ProgressNotifier();
-  },
+final progressProvider = AsyncNotifierProviderFamily<ProgressNotifier, ProgressState, String>(
+  () => ProgressNotifier(),
 );

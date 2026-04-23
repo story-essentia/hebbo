@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:hebbo/theme/app_theme.dart';
 import 'package:hebbo/widgets/about_hebbo_sheet.dart';
 import 'package:hebbo/widgets/flanker_detail_sheet.dart';
+import 'package:hebbo/widgets/task_switch_detail_sheet.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -13,7 +14,15 @@ class HomeScreen extends StatelessWidget {
       backgroundColor: Colors.transparent, // Let the sheet widget handle its own bg/corners
       builder: (context) => const FlankerDetailSheet(),
     );
+  }  void _showTaskSwitchDetail(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => const TaskSwitchDetailSheet(),
+    );
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -46,9 +55,10 @@ class HomeScreen extends StatelessWidget {
               _buildGameCard(
                 context: context,
                 title: 'Task Switching',
-                subtitle: 'Coming soon',
+                subtitle: 'Cognitive Flexibility',
                 icon: Icons.swap_horiz,
-                isActive: false,
+                isActive: true,
+                onTap: () => _showTaskSwitchDetail(context),
               ),
               const SizedBox(height: 16),
               _buildGameCard(

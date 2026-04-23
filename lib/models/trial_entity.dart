@@ -7,6 +7,7 @@ class TrialEntity {
   final int reactionMs;
   final int difficulty;
   final DateTime timestamp;
+  final String? metadata;
 
   TrialEntity({
     this.id,
@@ -17,5 +18,6 @@ class TrialEntity {
     required this.reactionMs,
     required this.difficulty,
     required this.timestamp,
+    this.metadata,
   });
 }

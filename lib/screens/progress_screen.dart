@@ -3,24 +3,26 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hebbo/providers/progress_provider.dart';
 import 'package:hebbo/widgets/progress_metrics_widget.dart';
 import 'package:hebbo/widgets/progress_chart.dart';
+import 'package:hebbo/theme/app_theme.dart';
 
 class ProgressScreen extends ConsumerWidget {
-  const ProgressScreen({super.key});
+  final String gameId;
+  const ProgressScreen({super.key, this.gameId = 'flanker'});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final stateAsync = ref.watch(progressProvider);
+    final stateAsync = ref.watch(progressProvider(gameId));
 
     return Scaffold(
-      backgroundColor: const Color(0xFF150629),
+      backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: const Text(
-          "Your Progress",
-          style: TextStyle(color: Color(0xFFefdfff)),
+        title: Text(
+          gameId == 'task-switching' ? "Switching Progress" : "Flanker Progress",
+          style: AppTextStyles.plusJakarta(color: AppColors.textPrimary, fontWeight: FontWeight.bold),
         ),
         backgroundColor: Colors.transparent,
         elevation: 0,
-        iconTheme: const IconThemeData(color: Color(0xFFefdfff)),
+        iconTheme: const IconThemeData(color: AppColors.textPrimary),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.of(context).pop(),
@@ -28,6 +30,8 @@ class ProgressScreen extends ConsumerWidget {
       ),
       body: stateAsync.when(
         data: (state) {
+          final isTaskSwitch = gameId == 'task-switching';
+          
           return SingleChildScrollView(
             child: Padding(
               padding: const EdgeInsets.all(16.0),
@@ -41,17 +45,18 @@ class ProgressScreen extends ConsumerWidget {
                     children: [
                       Text(
                         "Session History",
-                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          color: const Color(0xFFefdfff),
+                        style: AppTextStyles.plusJakarta(
+                          color: AppColors.textPrimary,
+                          fontSize: 20,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
                       TextButton(
                         onPressed: () {
-                          ref.read(progressProvider.notifier).toggleViewMode();
+                          ref.read(progressProvider(gameId).notifier).toggleViewMode();
                         },
                         style: TextButton.styleFrom(
-                          foregroundColor: const Color(0xFFff8aa7),
+                          foregroundColor: AppColors.primary,
                         ),
                         child: Text(
                           state.showAllTime ? "All time" : "Last 10",
@@ -61,21 +66,21 @@ class ProgressScreen extends ConsumerWidget {
                     ],
                   ),
                   const SizedBox(height: 8),
-                  Row(
-                    children: const [
+                  Wrap(
+                    spacing: 16,
+                    runSpacing: 8,
+                    children: [
                       _LegendItem(
-                        color: Color(0xFFFF8AA7),
-                        label: 'Congruent',
+                        color: const Color(0xFFFF8AA7),
+                        label: isTaskSwitch ? 'Repeat' : 'Congruent',
                         isDashed: false,
                       ),
-                      SizedBox(width: 16),
                       _LegendItem(
-                        color: Color(0xFFf0bfff),
-                        label: 'Incongruent',
+                        color: const Color(0xFFf0bfff),
+                        label: isTaskSwitch ? 'Switch' : 'Incongruent',
                         isDashed: true,
                       ),
-                      SizedBox(width: 16),
-                      _LegendItem(
+                      const _LegendItem(
                         color: Color(0xFF00E676),
                         label: 'Difficulty',
                         isDashed: false,
@@ -93,12 +98,12 @@ class ProgressScreen extends ConsumerWidget {
           );
         },
         loading: () =>
-            const Center(child: CircularProgressIndicator(color: Colors.white)),
+            const Center(child: CircularProgressIndicator(color: AppColors.primary)),
         error: (err, stack) => Center(
           child: Padding(
             padding: const EdgeInsets.all(16.0),
             child: Text(
-              'Error: $err',
+              'Error loading progress',
               style: const TextStyle(color: Colors.red),
             ),
           ),
@@ -126,15 +131,15 @@ class _LegendItem extends StatelessWidget {
       children: [
         SizedBox(
           width: 16,
-          height: 2,
+          height: 3,
           child: CustomPaint(
             painter: _LinePainter(color: color, isDashed: isDashed),
           ),
         ),
-        const SizedBox(width: 6),
+        const SizedBox(width: 8),
         Text(
           label,
-          style: const TextStyle(fontSize: 12, color: Colors.white70),
+          style: AppTextStyles.plusJakarta(fontSize: 12, color: AppColors.textPrimary.withValues(alpha: 0.7)),
         ),
       ],
     );

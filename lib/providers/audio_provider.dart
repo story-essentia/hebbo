@@ -12,6 +12,8 @@ final gameAudioProvider = Provider<GameAudioNotifier>((ref) {
 class GameAudioNotifier {
   final AudioPlayer _ambiencePlayer = AudioPlayer();
   final AudioPlayer _sfxPlayer = AudioPlayer();
+  final AudioPlayer _correctPlayer = AudioPlayer();
+  final AudioPlayer _wrongPlayer = AudioPlayer();
   
   bool _isInitialized = false;
 
@@ -21,6 +23,16 @@ class GameAudioNotifier {
     final session = await AudioSession.instance;
     await session.configure(const AudioSessionConfiguration.music());
     
+    // Pre-load sounds for immediate playback
+    try {
+      await _correctPlayer.setAsset('assets/sounds/correct_tap.mp3');
+      await _wrongPlayer.setAsset('assets/sounds/wrong_tap.mp3');
+      await _correctPlayer.setVolume(0.4);
+      await _wrongPlayer.setVolume(0.4);
+    } catch (e) {
+      print("Audio Preload Error: $e");
+    }
+
     _isInitialized = true;
   }
 
@@ -34,7 +46,7 @@ class GameAudioNotifier {
       try {
         await _ambiencePlayer.setAsset('assets/sounds/underwater-ambience.mp3');
         await _ambiencePlayer.setLoopMode(LoopMode.one);
-        await _ambiencePlayer.setVolume(0.25); // Initial volume, will refine in Polish phase
+        await _ambiencePlayer.setVolume(0.25); 
         unawaited(_ambiencePlayer.play());
       } catch (e) {
         // Silent fallback as per spec
@@ -52,12 +64,11 @@ class GameAudioNotifier {
   }
 
   Future<void> stopSessionAudio() async {
-    print("GameAudio: Stopping all session audio");
-    // Fire and forget stop calls to ensure they are triggered even if context is being torn down
     unawaited(_ambiencePlayer.stop());
     unawaited(_sfxPlayer.stop());
+    unawaited(_correctPlayer.stop());
+    unawaited(_wrongPlayer.stop());
     
-    // Release audio session focus
     try {
       final session = await AudioSession.instance;
       await session.setActive(false);
@@ -70,7 +81,7 @@ class GameAudioNotifier {
     await _ensureInitialized();
     try {
       await _sfxPlayer.setAsset('assets/sounds/level-up.mp3');
-      await _sfxPlayer.setVolume(0.4); // Reduced to 40%
+      await _sfxPlayer.setVolume(0.4);
       unawaited(_sfxPlayer.play());
     } catch (e) {
       print("Audio Error: $e");
@@ -88,11 +99,36 @@ class GameAudioNotifier {
     }
   }
 
+  Future<void> playCorrectTap() async {
+    await _ensureInitialized();
+    try {
+      if (_correctPlayer.playing) {
+        await _correctPlayer.stop();
+      }
+      await _correctPlayer.seek(Duration.zero);
+      unawaited(_correctPlayer.play());
+    } catch (e) {
+      print("Audio Error: $e");
+    }
+  }
+
+  Future<void> playWrongTap() async {
+    await _ensureInitialized();
+    try {
+      if (_wrongPlayer.playing) {
+        await _wrongPlayer.stop();
+      }
+      await _wrongPlayer.seek(Duration.zero);
+      unawaited(_wrongPlayer.play());
+    } catch (e) {
+      print("Audio Error: $e");
+    }
+  }
+
   void dispose() {
-    print("GameAudio: Disposing notifier");
-    _ambiencePlayer.stop();
-    _sfxPlayer.stop();
     _ambiencePlayer.dispose();
     _sfxPlayer.dispose();
+    _correctPlayer.dispose();
+    _wrongPlayer.dispose();
   }
 }

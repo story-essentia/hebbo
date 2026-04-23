@@ -6,9 +6,12 @@ import 'package:hebbo/screens/progress_screen.dart';
 import 'package:hebbo/providers/adaptive_engine_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hebbo/providers/audio_provider.dart';
+import 'package:hebbo/providers/task_switch_provider.dart';
+import 'package:hebbo/screens/task_switch_screen.dart';
 
 class SessionEndPlaceholder extends ConsumerStatefulWidget {
-  const SessionEndPlaceholder({super.key});
+  final String gameId;
+  const SessionEndPlaceholder({super.key, this.gameId = 'flanker'});
 
   @override
   ConsumerState<SessionEndPlaceholder> createState() => _SessionEndPlaceholderState();
@@ -65,7 +68,18 @@ class _SessionEndPlaceholderState extends ConsumerState<SessionEndPlaceholder> {
   @override
   Widget build(BuildContext context) {
     final currentLevel = ref.watch(adaptiveEngineProvider).currentLevel;
-    final isPersisted = ref.watch(flankerGameProvider).isPersisted;
+    
+    final bool isPersisted;
+    int? switchCost;
+
+    if (widget.gameId == 'task-switching') {
+      final state = ref.watch(taskSwitchGameProvider);
+      isPersisted = state.isPersisted;
+      switchCost = state.switchCostMs;
+    } else {
+      final state = ref.watch(flankerGameProvider);
+      isPersisted = state.isPersisted;
+    }
 
     return PopScope(
       canPop: isPersisted,
@@ -105,6 +119,18 @@ class _SessionEndPlaceholderState extends ConsumerState<SessionEndPlaceholder> {
                       fontWeight: FontWeight.bold,
                     ),
                   ),
+                  if (switchCost != null) ...[
+                    const SizedBox(height: 12),
+                    Text(
+                      'Switch Cost: ${switchCost < 0 ? 0 : switchCost}ms',
+                      textAlign: TextAlign.center,
+                      style: AppTextStyles.plusJakarta(
+                        color: AppColors.neonBlue,
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
                   const SizedBox(height: 48),
                   _buildButton(
                     context: context,
@@ -123,7 +149,9 @@ class _SessionEndPlaceholderState extends ConsumerState<SessionEndPlaceholder> {
                         Navigator.pushReplacement(
                           context,
                           MaterialPageRoute(
-                            builder: (_) => const FlankerGameScreen(),
+                            builder: (_) => widget.gameId == 'task-switching' 
+                                ? const TaskSwitchScreen() 
+                                : const FlankerGameScreen(),
                           ),
                         );
                       }
@@ -146,7 +174,7 @@ class _SessionEndPlaceholderState extends ConsumerState<SessionEndPlaceholder> {
                       if (context.mounted) {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (_) => const ProgressScreen()),
+                          MaterialPageRoute(builder: (_) => ProgressScreen(gameId: widget.gameId)),
                         );
                       }
                     },

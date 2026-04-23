@@ -1,28 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hebbo/theme/app_theme.dart';
-import 'package:hebbo/providers/flanker_stats_provider.dart';
-import 'package:hebbo/screens/flanker_game_screen.dart';
+import 'package:hebbo/providers/task_switch_stats_provider.dart';
+import 'package:hebbo/screens/task_switch_screen.dart';
 import 'package:hebbo/screens/progress_screen.dart';
 import 'package:hebbo/widgets/stat_chip.dart';
 import 'package:hebbo/widgets/stat_chip_skeleton.dart';
-
-import 'package:hebbo/widgets/flanker_tutorial_sheet.dart';
-import 'package:hebbo/providers/database_provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:hebbo/widgets/task_switch_tutorial_sheet.dart';
+import 'package:hebbo/providers/database_provider.dart';
 
-class FlankerDetailSheet extends ConsumerWidget {
-  const FlankerDetailSheet({
-    super.key,
-  });
+class TaskSwitchDetailSheet extends ConsumerWidget {
+  const TaskSwitchDetailSheet({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final statsAsync = ref.watch(flankerStatsProvider);
+    final statsAsync = ref.watch(taskSwitchStatsProvider);
 
     return Container(
       decoration: const BoxDecoration(
-        color: Color(0xFF150629),
+        color: AppColors.background,
         borderRadius: BorderRadius.only(
           topLeft: Radius.circular(32),
           topRight: Radius.circular(32),
@@ -33,42 +30,38 @@ class FlankerDetailSheet extends ConsumerWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Drag Handle
           Center(
             child: Container(
               width: 48,
               height: 4,
               decoration: BoxDecoration(
-                color: const Color(0xFFEFDFFF).withValues(alpha: 0.1),
+                color: AppColors.textPrimary.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
           ),
           const SizedBox(height: 24),
-          
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Flanker',
+                'Task Switching',
                 style: AppTextStyles.plusJakarta(
-                  color: const Color(0xFFEFDFFF),
+                  color: AppColors.textPrimary,
                   fontSize: 28,
                   fontWeight: FontWeight.bold,
                 ),
               ),
               IconButton(
-                onPressed: () => FlankerTutorialSheet.show(context),
+                onPressed: () => TaskSwitchTutorialSheet.show(context),
                 icon: Icon(
                   Icons.help_outline,
-                  color: const Color(0xFFEFDFFF).withValues(alpha: 0.5),
+                  color: AppColors.textPrimary.withValues(alpha: 0.5),
                 ),
               ),
             ],
           ),
           const SizedBox(height: 16),
-          
-          // Stats Section
           statsAsync.when(
             loading: () => const Row(
               children: [
@@ -77,23 +70,20 @@ class FlankerDetailSheet extends ConsumerWidget {
                 Expanded(child: StatChipSkeleton()),
               ],
             ),
-            error: (err, stack) => Text(
-              'Error loading statistics',
-              style: AppTextStyles.plusJakarta(color: Colors.red),
-            ),
+            error: (err, stack) => Text('Error loading statistics', style: AppTextStyles.plusJakarta(color: Colors.red)),
             data: (stats) {
               if (!stats.hasPlayedBefore) {
                 return Text(
                   'First session — we\'ll find your level',
                   style: AppTextStyles.plusJakarta(
-                    color: const Color(0xFFEFDFFF).withValues(alpha: 0.5),
+                    color: AppColors.textPrimary.withValues(alpha: 0.5),
                     fontSize: 14,
                   ),
                 );
               }
               return Row(
                 children: [
-                  Expanded(
+                   Expanded(
                     child: StatChip(
                       label: 'Personal Best',
                       value: '${stats.bestRtMs} ms',
@@ -112,43 +102,36 @@ class FlankerDetailSheet extends ConsumerWidget {
               );
             },
           ),
-          
           const SizedBox(height: 24),
-          
-          // Science Summary
           Text(
-            'Trains selective attention and inhibitory control — your ability to focus on what matters and ignore what doesn\'t.',
+            'Trains cognitive flexibility — your ability to rapidly shift between different rules and mental sets.',
             style: AppTextStyles.plusJakarta(
-              color: const Color(0xFFEFDFFF).withValues(alpha: 0.8),
+              color: AppColors.textPrimary.withValues(alpha: 0.8),
               fontSize: 16,
               height: 1.5,
             ),
           ),
           const SizedBox(height: 12),
-          
-          // Citation
           Text(
-            'Based on Eriksen & Eriksen (1974)',
+            'Based on Rogers & Monsell (1995)',
             style: AppTextStyles.plusJakarta(
-              color: const Color(0xFFEFDFFF).withValues(alpha: 0.6),
+              color: AppColors.textPrimary.withValues(alpha: 0.6),
               fontSize: 12,
               fontStyle: FontStyle.italic,
             ),
           ),
           const SizedBox(height: 32),
-          
-          // Play Button
           Container(
             decoration: BoxDecoration(
               gradient: const LinearGradient(
-                colors: [Color(0xFFFF8AA7), Color(0xFFFF5C8D)],
+                colors: [AppColors.primary, Color(0xFFFF5C8D)],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
               borderRadius: BorderRadius.circular(100),
               boxShadow: [
                 BoxShadow(
-                  color: const Color(0xFFFF8AA7).withValues(alpha: 0.3),
+                  color: AppColors.primary.withValues(alpha: 0.3),
                   blurRadius: 12,
                   offset: const Offset(0, 4),
                 ),
@@ -159,20 +142,18 @@ class FlankerDetailSheet extends ConsumerWidget {
               child: InkWell(
                 onTap: () async {
                   final prefs = ref.read(sharedPreferencesProvider);
-                  final hasSeenTutorial = prefs.getBool('has_seen_flanker_tutorial') ?? false;
+                  final hasSeenTutorial = prefs.getBool('has_seen_task_switch_tutorial') ?? false;
 
                   if (!hasSeenTutorial) {
-                    await prefs.setBool('has_seen_flanker_tutorial', true);
+                    await prefs.setBool('has_seen_task_switch_tutorial', true);
                     if (context.mounted) {
-                      await FlankerTutorialSheet.show(context);
+                      await TaskSwitchTutorialSheet.show(context);
                     }
                   }
 
                   if (context.mounted) {
                     Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (context) => const FlankerGameScreen(),
-                      ),
+                      MaterialPageRoute(builder: (context) => const TaskSwitchScreen()),
                     );
                   }
                 },
@@ -203,14 +184,14 @@ class FlankerDetailSheet extends ConsumerWidget {
                   onPressed: () {
                     Navigator.of(context).push(
                       MaterialPageRoute(
-                        builder: (context) => const ProgressScreen(gameId: 'flanker'),
+                        builder: (context) => const ProgressScreen(gameId: 'task-switching'),
                       ),
                     );
                   },
                   child: Text(
                     'View your progress',
                     style: AppTextStyles.plusJakarta(
-                      color: const Color(0xFFFF8AA7),
+                      color: AppColors.primary,
                       fontSize: 16,
                     ),
                   ),
