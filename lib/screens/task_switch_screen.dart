@@ -2,44 +2,40 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hebbo/theme/app_theme.dart';
-import 'package:hebbo/logic/flanker_domain.dart';
-import 'package:hebbo/providers/flanker_game_provider.dart';
+import 'package:hebbo/providers/task_switch_provider.dart';
 import 'package:hebbo/screens/session_end_placeholder.dart';
 import 'package:hebbo/providers/adaptive_engine_provider.dart';
-import 'package:hebbo/widgets/fish_row_widget.dart';
-import 'package:hebbo/widgets/backgrounds/environment_factory.dart';
-import 'package:hebbo/widgets/backgrounds/animated_background_wrapper.dart';
-import 'package:hebbo/widgets/backgrounds/environment_transitioner.dart';
 import 'package:hebbo/providers/audio_provider.dart';
+import 'package:hebbo/state/task_switch_state.dart';
+import 'package:hebbo/widgets/neon_orb_widget.dart';
+import 'package:hebbo/widgets/particle_background.dart';
 
-class FlankerGameScreen extends ConsumerStatefulWidget {
-  const FlankerGameScreen({super.key});
+class TaskSwitchScreen extends ConsumerStatefulWidget {
+  const TaskSwitchScreen({super.key});
 
   @override
-  ConsumerState<FlankerGameScreen> createState() => _FlankerGameScreenState();
+  ConsumerState<TaskSwitchScreen> createState() => _TaskSwitchScreenState();
 }
 
-class _FlankerGameScreenState extends ConsumerState<FlankerGameScreen> {
+class _TaskSwitchScreenState extends ConsumerState<TaskSwitchScreen> {
   @override
   void initState() {
     super.initState();
     Future.microtask(() async {
       // Invalidate providers to ensure a fresh session state
-      ref.invalidate(flankerGameProvider);
+      ref.invalidate(taskSwitchGameProvider);
       
       final notifier = ref.read(adaptiveEngineProvider.notifier);
-      await notifier.load('flanker');
+      await notifier.load('task-switching');
       final startLevel = ref.read(adaptiveEngineProvider).currentLevel;
-      ref.read(flankerGameProvider.notifier).startSession(startLevel);
+      ref.read(taskSwitchGameProvider.notifier).startSession(startLevel);
       ref.read(gameAudioProvider).startSessionAmbience();
     });
   }
 
   @override
   void dispose() {
-    // Only stop session audio if we haven't reached the completion screen.
-    // If session is complete, SessionEndPlaceholder will handle the stop signal.
-    if (!ref.read(flankerGameProvider).isSessionComplete) {
+    if (!ref.read(taskSwitchGameProvider).isSessionComplete) {
       ref.read(gameAudioProvider).stopSessionAudio();
     }
     super.dispose();
@@ -47,21 +43,20 @@ class _FlankerGameScreenState extends ConsumerState<FlankerGameScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final state = ref.watch(flankerGameProvider);
+    final state = ref.watch(taskSwitchGameProvider);
     final level = ref.watch(adaptiveEngineProvider).currentLevel;
 
-    ref.listen(flankerGameProvider.select((s) => s.isSessionComplete),
-        (previous, next) {
+    ref.listen(taskSwitchGameProvider.select((s) => s.isSessionComplete), (previous, next) {
       if (next) {
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (_) => const SessionEndPlaceholder(gameId: 'flanker')),
+          MaterialPageRoute(builder: (_) => const SessionEndPlaceholder(gameId: 'task-switching')),
         );
       }
     });
 
     // Handle Ambience Pause/Resume
-    ref.listen(flankerGameProvider.select((s) => s.isPaused), (previous, next) {
+    ref.listen(taskSwitchGameProvider.select((s) => s.isPaused), (previous, next) {
       if (next) {
         ref.read(gameAudioProvider).pauseAmbience();
       } else if (previous == true && next == false) {
@@ -70,65 +65,53 @@ class _FlankerGameScreenState extends ConsumerState<FlankerGameScreen> {
     });
 
     // Handle Level Up SFX
-    ref.listen(adaptiveEngineProvider.select((s) => s.currentLevel),
-        (previous, next) {
+    ref.listen(adaptiveEngineProvider.select((s) => s.currentLevel), (previous, next) {
       if (previous != null && next > previous && state.trialsRemaining < 60) {
         ref.read(gameAudioProvider).playLevelUp();
       }
     });
 
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: AppColors.background,
       body: Stack(
         children: [
-          // Environment Background
-          AnimatedBackgroundWrapper(
-            isResetting: state.isResetting,
-            isPaused: state.isPaused,
-            child: EnvironmentTransitioner(level: level),
-          ),
-
-          // Stimuli Layout
-          Center(
-            child: Opacity(
-              opacity: state.isPaused ? 0.3 : 1.0,
-              child: FishRowWidget(state: state),
+          // Visual Environment
+          const ParticleBackground(),
+          
+          // Stimulus
+          if (state.currentStimulus != null)
+            Center(
+              child: Opacity(
+                opacity: state.isPaused ? 0.3 : 1.0,
+                child: NeonOrbWidget(
+                  digit: state.currentStimulus!.digit,
+                  rule: state.currentStimulus!.rule,
+                  feedback: state.feedbackState,
+                ),
+              ),
             ),
-          ),
 
-          // Tap Zones — behavior depends on game state
+          // Tap Zones
           if (!state.isPaused)
             Positioned.fill(
-              child: state.isWaitingForContinue
-                  ? GestureDetector(
-                      onTapDown: (_) => ref
-                          .read(flankerGameProvider.notifier)
-                          .continueAfterTimeout(),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: GestureDetector(
+                      onTapDown: (_) => ref.read(taskSwitchGameProvider.notifier).reportResponse(false),
                       behavior: HitTestBehavior.opaque,
                       child: Container(color: Colors.transparent),
-                    )
-                  : Row(
-                      children: [
-                        Expanded(
-                          child: GestureDetector(
-                            onTapDown: (_) => ref
-                                .read(flankerGameProvider.notifier)
-                                .reportResponse(Side.left),
-                            behavior: HitTestBehavior.opaque,
-                            child: Container(color: Colors.transparent),
-                          ),
-                        ),
-                        Expanded(
-                          child: GestureDetector(
-                            onTapDown: (_) => ref
-                                .read(flankerGameProvider.notifier)
-                                .reportResponse(Side.right),
-                            behavior: HitTestBehavior.opaque,
-                            child: Container(color: Colors.transparent),
-                          ),
-                        ),
-                      ],
                     ),
+                  ),
+                  Expanded(
+                    child: GestureDetector(
+                      onTapDown: (_) => ref.read(taskSwitchGameProvider.notifier).reportResponse(true),
+                      behavior: HitTestBehavior.opaque,
+                      child: Container(color: Colors.transparent),
+                    ),
+                  ),
+                ],
+              ),
             ),
 
           // Premium Progress Bar
@@ -139,7 +122,7 @@ class _FlankerGameScreenState extends ConsumerState<FlankerGameScreen> {
             child: Container(
               height: 12,
               decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.1),
+                color: Colors.white.withValues(alpha: 0.05),
                 borderRadius: BorderRadius.circular(10),
                 border: Border.all(color: Colors.white.withValues(alpha: 0.1), width: 1),
               ),
@@ -160,7 +143,7 @@ class _FlankerGameScreenState extends ConsumerState<FlankerGameScreen> {
                           ),
                           boxShadow: [
                             BoxShadow(
-                              color: const Color(0xFFFF8AA7).withValues(alpha: 0.5),
+                              color: AppColors.primary.withValues(alpha: 0.5),
                               blurRadius: 8,
                               spreadRadius: 2,
                             ),
@@ -181,11 +164,10 @@ class _FlankerGameScreenState extends ConsumerState<FlankerGameScreen> {
             child: IconButton(
               icon: Icon(
                 state.isPaused ? Icons.play_arrow : Icons.pause,
-                color: const Color(0xFFEFDFFF).withValues(alpha: 0.6),
+                color: AppColors.textPrimary.withValues(alpha: 0.6),
                 size: 28,
               ),
-              onPressed: () =>
-                  ref.read(flankerGameProvider.notifier).togglePause(),
+              onPressed: () => ref.read(taskSwitchGameProvider.notifier).togglePause(),
             ),
           ),
 
@@ -195,7 +177,7 @@ class _FlankerGameScreenState extends ConsumerState<FlankerGameScreen> {
               child: BackdropFilter(
                 filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
                 child: Container(
-                  color: const Color(0xFF150629).withValues(alpha: 0.7),
+                  color: AppColors.background.withValues(alpha: 0.7),
                   child: Center(
                     child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 48.0),
@@ -207,7 +189,7 @@ class _FlankerGameScreenState extends ConsumerState<FlankerGameScreen> {
                             'Paused',
                             textAlign: TextAlign.center,
                             style: AppTextStyles.plusJakarta(
-                              color: const Color(0xFFEFDFFF),
+                              color: AppColors.textPrimary,
                               fontSize: 32,
                               fontWeight: FontWeight.bold,
                             ),
@@ -216,9 +198,7 @@ class _FlankerGameScreenState extends ConsumerState<FlankerGameScreen> {
                           _buildOverlayButton(
                             label: 'Resume',
                             isPrimary: true,
-                            onPressed: () => ref
-                                .read(flankerGameProvider.notifier)
-                                .togglePause(),
+                            onPressed: () => ref.read(taskSwitchGameProvider.notifier).togglePause(),
                           ),
                           const SizedBox(height: 16),
                           _buildOverlayButton(
@@ -226,8 +206,7 @@ class _FlankerGameScreenState extends ConsumerState<FlankerGameScreen> {
                             isPrimary: false,
                             onPressed: () {
                               ref.read(gameAudioProvider).stopSessionAudio();
-                              Navigator.of(context)
-                                  .popUntil((route) => route.isFirst);
+                              Navigator.of(context).popUntil((route) => route.isFirst);
                             },
                           ),
                         ],
@@ -249,16 +228,12 @@ class _FlankerGameScreenState extends ConsumerState<FlankerGameScreen> {
   }) {
     return ElevatedButton(
       style: ElevatedButton.styleFrom(
-        backgroundColor:
-            isPrimary ? const Color(0xFFFF8AA7) : const Color(0xFF301A4D),
-        foregroundColor:
-            isPrimary ? const Color(0xFF150629) : const Color(0xFFEFDFFF),
+        backgroundColor: isPrimary ? AppColors.primary : AppColors.surface,
+        foregroundColor: isPrimary ? AppColors.background : AppColors.textPrimary,
         padding: const EdgeInsets.symmetric(vertical: 18),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(48),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(48)),
         elevation: 0,
-       ),
+      ),
       onPressed: onPressed,
       child: Text(
         label,

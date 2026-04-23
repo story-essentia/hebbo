@@ -1,5 +1,6 @@
 class SessionEntity {
   final int? id;
+  final String gameId;
   final int sessionNum;
   final DateTime startedAt;
   final DateTime endedAt;
@@ -9,6 +10,7 @@ class SessionEntity {
 
   SessionEntity({
     this.id,
+    this.gameId = 'flanker',
     required this.sessionNum,
     required this.startedAt,
     required this.endedAt,

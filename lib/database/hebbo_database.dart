@@ -13,16 +13,18 @@ class Trials extends Table {
   IntColumn get id => integer().autoIncrement()();
   IntColumn get sessionId => integer().references(Sessions, #id)();
   IntColumn get trialNum => integer()();
-  TextColumn get type => text()();
+  TextColumn get type => text()(); // 'congruent'/'incongruent' or 'switch'/'repeat'
   BoolColumn get correct => boolean()();
   IntColumn get reactionMs => integer()();
   IntColumn get difficulty => integer()();
   DateTimeColumn get timestamp => dateTime()();
+  TextColumn get metadata => text().nullable()(); // Add for extra game data
 }
 
 @DataClassName('SessionTable')
 class Sessions extends Table {
   IntColumn get id => integer().autoIncrement()();
+  TextColumn get gameId => text().withDefault(const Constant('flanker'))(); // Add
   IntColumn get sessionNum => integer()();
   DateTimeColumn get startedAt => dateTime()();
   DateTimeColumn get endedAt => dateTime()();
@@ -46,25 +48,41 @@ class HebboDatabase extends _$HebboDatabase {
   HebboDatabase() : super(_openConnection());
 
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
 
-  Future<int?> getPersonalBestRt() async {
+  @override
+  MigrationStrategy get migration => MigrationStrategy(
+        onCreate: (m) async {
+          await m.createAll();
+        },
+        onUpgrade: (m, from, to) async {
+          if (from < 2) {
+            // Add columns for version 2
+            await m.addColumn(sessions, sessions.gameId);
+            await m.addColumn(trials, trials.metadata);
+          }
+        },
+      );
+
+  Future<int?> getPersonalBestRt(String gameId) async {
     final result = await customSelect(
       'SELECT MIN(avg_rt) as min_rt FROM ('
       '  SELECT AVG(t.reaction_ms) as avg_rt '
       '  FROM sessions s '
       '  JOIN trials t ON t.session_id = s.id '
-      '  WHERE t.correct = 1 AND t.reaction_ms >= 150 AND s.ended_at IS NOT NULL '
+      '  WHERE s.game_id = ? AND t.correct = 1 AND t.reaction_ms >= 150 AND s.ended_at IS NOT NULL '
       '  GROUP BY s.id'
       ');',
+      variables: [Variable.withString(gameId)],
     ).getSingleOrNull();
     final value = result?.read<double?>('min_rt');
     return value?.round();
   }
 
-  Future<int> getTotalSessionsCompleted() async {
+  Future<int> getTotalSessionsCompleted(String gameId) async {
     final result = await customSelect(
-      'SELECT COUNT(id) as count FROM sessions WHERE ended_at IS NOT NULL;',
+      'SELECT COUNT(id) as count FROM sessions WHERE game_id = ? AND ended_at IS NOT NULL;',
+      variables: [Variable.withString(gameId)],
     ).getSingleOrNull();
     return result?.read<int>('count') ?? 0;
   }
@@ -79,24 +97,32 @@ class HebboDatabase extends _$HebboDatabase {
     return result?.environmentTier;
   }
 
-  Future<List<SessionChartData>> getSessionChartData() async {
+  Future<List<SessionChartData>> getSessionChartData(String gameId) async {
+    final typeA = gameId == 'task-switching' ? 'repeat' : 'congruent';
+    final typeB = gameId == 'task-switching' ? 'switch' : 'incongruent';
+
     final result = await customSelect('''
       SELECT 
         s.session_num, 
         s.ending_level,
-        AVG(CASE WHEN t.type = 'congruent' THEN t.reaction_ms END) as avg_congruent,
-        AVG(CASE WHEN t.type = 'incongruent' THEN t.reaction_ms END) as avg_incongruent
+        AVG(CASE WHEN t.type = ? THEN t.reaction_ms END) as avg_a,
+        AVG(CASE WHEN t.type = ? THEN t.reaction_ms END) as avg_b
       FROM sessions s
       LEFT JOIN trials t ON t.session_id = s.id AND t.correct = 1
+      WHERE s.game_id = ?
       GROUP BY s.id
       ORDER BY s.session_num ASC;
-    ''').get();
+    ''', variables: [
+      Variable.withString(typeA),
+      Variable.withString(typeB),
+      Variable.withString(gameId)
+    ]).get();
 
     return result.map((row) {
       return SessionChartData(
         sessionNum: row.read<int>('session_num'),
-        avgCongruentRt: row.read<double?>('avg_congruent') ?? 0.0,
-        avgIncongruentRt: row.read<double?>('avg_incongruent') ?? 0.0,
+        metricARt: row.read<double?>('avg_a') ?? 0.0,
+        metricBRt: row.read<double?>('avg_b') ?? 0.0,
         endingDifficulty: row.read<int>('ending_level'),
       );
     }).toList();
@@ -122,12 +148,29 @@ class HebboDatabase extends _$HebboDatabase {
 
     // Also ensuring trials are cleared if they were orphaned (Drift usually needs triggers or manual delete if no cascades)
     // For simplicity since we want a clean state:
-    await customStatement('DELETE FROM trials WHERE session_id NOT IN (SELECT id FROM sessions)');
     await delete(difficultyStates).go();
   }
 
+  Future<void> repairSessionNumbers() async {
+    final games = ['flanker', 'task-switching'];
+    for (final gameId in games) {
+      final sessionRows = await (select(sessions)
+            ..where((t) => t.gameId.equals(gameId))
+            ..orderBy([(t) => OrderingTerm.asc(t.startedAt)]))
+          .get();
+      
+      for (int i = 0; i < sessionRows.length; i++) {
+        final session = sessionRows[i];
+        if (session.sessionNum != i + 1) {
+          await (update(sessions)..where((t) => t.id.equals(session.id)))
+              .write(SessionsCompanion(sessionNum: Value(i + 1)));
+        }
+      }
+    }
+  }
+
   Future<void> seedMockSessions() async {
-    final existing = await getTotalSessionsCompleted();
+    final existing = await getTotalSessionsCompleted('flanker');
     if (existing > 0) return;
 
     for (int i = 1; i <= 8; i++) {

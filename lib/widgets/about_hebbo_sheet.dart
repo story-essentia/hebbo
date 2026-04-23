@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hebbo/theme/app_theme.dart';
 
-class AboutHebboSheet extends StatelessWidget {
+class AboutHebboSheet extends ConsumerWidget {
   const AboutHebboSheet({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Container(
       decoration: const BoxDecoration(
         color: Color(0xFF291543),
@@ -27,7 +28,7 @@ class AboutHebboSheet extends StatelessWidget {
             ),
             const SizedBox(height: 24),
             Text(
-              'Hebbo\'s training logic is based on well-established cognitive psychology paradigms. However, we make no claims that playing these games will cure or treat any medical condition.',
+              "Hebbo's training logic is based on well-established cognitive psychology paradigms. However, we make no claims that playing these games will cure or treat any medical condition.",
               style: AppTextStyles.plusJakarta(
                 color: const Color(0xFFEFDFFF).withValues(alpha: 0.8),
                 fontSize: 14,
@@ -49,9 +50,10 @@ class AboutHebboSheet extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             _buildCitation(
-              'Rueda, M. R., et al. (2005). Training, maturation, and genetic influences on the development of executive attention. PNAS, 102(41), 14931-14936.',
+              'Rogers, R. D., & Monsell, S. (1995). Costs of a predictable switch between simple cognitive tasks. Journal of Experimental Psychology: General, 124(2), 207-231.',
             ),
             const SizedBox(height: 32),
+            
             SizedBox(
               width: double.infinity,
               child: TextButton(

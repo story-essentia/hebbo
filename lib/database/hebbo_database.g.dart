@@ -22,6 +22,16 @@ class $SessionsTable extends Sessions
       'PRIMARY KEY AUTOINCREMENT',
     ),
   );
+  static const VerificationMeta _gameIdMeta = const VerificationMeta('gameId');
+  @override
+  late final GeneratedColumn<String> gameId = GeneratedColumn<String>(
+    'game_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('flanker'),
+  );
   static const VerificationMeta _sessionNumMeta = const VerificationMeta(
     'sessionNum',
   );
@@ -91,6 +101,7 @@ class $SessionsTable extends Sessions
   @override
   List<GeneratedColumn> get $columns => [
     id,
+    gameId,
     sessionNum,
     startedAt,
     endedAt,
@@ -112,6 +123,12 @@ class $SessionsTable extends Sessions
     final data = instance.toColumns(true);
     if (data.containsKey('id')) {
       context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('game_id')) {
+      context.handle(
+        _gameIdMeta,
+        gameId.isAcceptableOrUnknown(data['game_id']!, _gameIdMeta),
+      );
     }
     if (data.containsKey('session_num')) {
       context.handle(
@@ -183,6 +200,10 @@ class $SessionsTable extends Sessions
         DriftSqlType.int,
         data['${effectivePrefix}id'],
       )!,
+      gameId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}game_id'],
+      )!,
       sessionNum: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}session_num'],
@@ -218,6 +239,7 @@ class $SessionsTable extends Sessions
 
 class SessionTable extends DataClass implements Insertable<SessionTable> {
   final int id;
+  final String gameId;
   final int sessionNum;
   final DateTime startedAt;
   final DateTime endedAt;
@@ -226,6 +248,7 @@ class SessionTable extends DataClass implements Insertable<SessionTable> {
   final int environmentTier;
   const SessionTable({
     required this.id,
+    required this.gameId,
     required this.sessionNum,
     required this.startedAt,
     required this.endedAt,
@@ -237,6 +260,7 @@ class SessionTable extends DataClass implements Insertable<SessionTable> {
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<int>(id);
+    map['game_id'] = Variable<String>(gameId);
     map['session_num'] = Variable<int>(sessionNum);
     map['started_at'] = Variable<DateTime>(startedAt);
     map['ended_at'] = Variable<DateTime>(endedAt);
@@ -249,6 +273,7 @@ class SessionTable extends DataClass implements Insertable<SessionTable> {
   SessionsCompanion toCompanion(bool nullToAbsent) {
     return SessionsCompanion(
       id: Value(id),
+      gameId: Value(gameId),
       sessionNum: Value(sessionNum),
       startedAt: Value(startedAt),
       endedAt: Value(endedAt),
@@ -265,6 +290,7 @@ class SessionTable extends DataClass implements Insertable<SessionTable> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return SessionTable(
       id: serializer.fromJson<int>(json['id']),
+      gameId: serializer.fromJson<String>(json['gameId']),
       sessionNum: serializer.fromJson<int>(json['sessionNum']),
       startedAt: serializer.fromJson<DateTime>(json['startedAt']),
       endedAt: serializer.fromJson<DateTime>(json['endedAt']),
@@ -278,6 +304,7 @@ class SessionTable extends DataClass implements Insertable<SessionTable> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'id': serializer.toJson<int>(id),
+      'gameId': serializer.toJson<String>(gameId),
       'sessionNum': serializer.toJson<int>(sessionNum),
       'startedAt': serializer.toJson<DateTime>(startedAt),
       'endedAt': serializer.toJson<DateTime>(endedAt),
@@ -289,6 +316,7 @@ class SessionTable extends DataClass implements Insertable<SessionTable> {
 
   SessionTable copyWith({
     int? id,
+    String? gameId,
     int? sessionNum,
     DateTime? startedAt,
     DateTime? endedAt,
@@ -297,6 +325,7 @@ class SessionTable extends DataClass implements Insertable<SessionTable> {
     int? environmentTier,
   }) => SessionTable(
     id: id ?? this.id,
+    gameId: gameId ?? this.gameId,
     sessionNum: sessionNum ?? this.sessionNum,
     startedAt: startedAt ?? this.startedAt,
     endedAt: endedAt ?? this.endedAt,
@@ -307,6 +336,7 @@ class SessionTable extends DataClass implements Insertable<SessionTable> {
   SessionTable copyWithCompanion(SessionsCompanion data) {
     return SessionTable(
       id: data.id.present ? data.id.value : this.id,
+      gameId: data.gameId.present ? data.gameId.value : this.gameId,
       sessionNum: data.sessionNum.present
           ? data.sessionNum.value
           : this.sessionNum,
@@ -328,6 +358,7 @@ class SessionTable extends DataClass implements Insertable<SessionTable> {
   String toString() {
     return (StringBuffer('SessionTable(')
           ..write('id: $id, ')
+          ..write('gameId: $gameId, ')
           ..write('sessionNum: $sessionNum, ')
           ..write('startedAt: $startedAt, ')
           ..write('endedAt: $endedAt, ')
@@ -341,6 +372,7 @@ class SessionTable extends DataClass implements Insertable<SessionTable> {
   @override
   int get hashCode => Object.hash(
     id,
+    gameId,
     sessionNum,
     startedAt,
     endedAt,
@@ -353,6 +385,7 @@ class SessionTable extends DataClass implements Insertable<SessionTable> {
       identical(this, other) ||
       (other is SessionTable &&
           other.id == this.id &&
+          other.gameId == this.gameId &&
           other.sessionNum == this.sessionNum &&
           other.startedAt == this.startedAt &&
           other.endedAt == this.endedAt &&
@@ -363,6 +396,7 @@ class SessionTable extends DataClass implements Insertable<SessionTable> {
 
 class SessionsCompanion extends UpdateCompanion<SessionTable> {
   final Value<int> id;
+  final Value<String> gameId;
   final Value<int> sessionNum;
   final Value<DateTime> startedAt;
   final Value<DateTime> endedAt;
@@ -371,6 +405,7 @@ class SessionsCompanion extends UpdateCompanion<SessionTable> {
   final Value<int> environmentTier;
   const SessionsCompanion({
     this.id = const Value.absent(),
+    this.gameId = const Value.absent(),
     this.sessionNum = const Value.absent(),
     this.startedAt = const Value.absent(),
     this.endedAt = const Value.absent(),
@@ -380,6 +415,7 @@ class SessionsCompanion extends UpdateCompanion<SessionTable> {
   });
   SessionsCompanion.insert({
     this.id = const Value.absent(),
+    this.gameId = const Value.absent(),
     required int sessionNum,
     required DateTime startedAt,
     required DateTime endedAt,
@@ -394,6 +430,7 @@ class SessionsCompanion extends UpdateCompanion<SessionTable> {
        environmentTier = Value(environmentTier);
   static Insertable<SessionTable> custom({
     Expression<int>? id,
+    Expression<String>? gameId,
     Expression<int>? sessionNum,
     Expression<DateTime>? startedAt,
     Expression<DateTime>? endedAt,
@@ -403,6 +440,7 @@ class SessionsCompanion extends UpdateCompanion<SessionTable> {
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
+      if (gameId != null) 'game_id': gameId,
       if (sessionNum != null) 'session_num': sessionNum,
       if (startedAt != null) 'started_at': startedAt,
       if (endedAt != null) 'ended_at': endedAt,
@@ -414,6 +452,7 @@ class SessionsCompanion extends UpdateCompanion<SessionTable> {
 
   SessionsCompanion copyWith({
     Value<int>? id,
+    Value<String>? gameId,
     Value<int>? sessionNum,
     Value<DateTime>? startedAt,
     Value<DateTime>? endedAt,
@@ -423,6 +462,7 @@ class SessionsCompanion extends UpdateCompanion<SessionTable> {
   }) {
     return SessionsCompanion(
       id: id ?? this.id,
+      gameId: gameId ?? this.gameId,
       sessionNum: sessionNum ?? this.sessionNum,
       startedAt: startedAt ?? this.startedAt,
       endedAt: endedAt ?? this.endedAt,
@@ -437,6 +477,9 @@ class SessionsCompanion extends UpdateCompanion<SessionTable> {
     final map = <String, Expression>{};
     if (id.present) {
       map['id'] = Variable<int>(id.value);
+    }
+    if (gameId.present) {
+      map['game_id'] = Variable<String>(gameId.value);
     }
     if (sessionNum.present) {
       map['session_num'] = Variable<int>(sessionNum.value);
@@ -463,6 +506,7 @@ class SessionsCompanion extends UpdateCompanion<SessionTable> {
   String toString() {
     return (StringBuffer('SessionsCompanion(')
           ..write('id: $id, ')
+          ..write('gameId: $gameId, ')
           ..write('sessionNum: $sessionNum, ')
           ..write('startedAt: $startedAt, ')
           ..write('endedAt: $endedAt, ')
@@ -573,6 +617,17 @@ class $TrialsTable extends Trials with TableInfo<$TrialsTable, TrialTable> {
     type: DriftSqlType.dateTime,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _metadataMeta = const VerificationMeta(
+    'metadata',
+  );
+  @override
+  late final GeneratedColumn<String> metadata = GeneratedColumn<String>(
+    'metadata',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -583,6 +638,7 @@ class $TrialsTable extends Trials with TableInfo<$TrialsTable, TrialTable> {
     reactionMs,
     difficulty,
     timestamp,
+    metadata,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -655,6 +711,12 @@ class $TrialsTable extends Trials with TableInfo<$TrialsTable, TrialTable> {
     } else if (isInserting) {
       context.missing(_timestampMeta);
     }
+    if (data.containsKey('metadata')) {
+      context.handle(
+        _metadataMeta,
+        metadata.isAcceptableOrUnknown(data['metadata']!, _metadataMeta),
+      );
+    }
     return context;
   }
 
@@ -696,6 +758,10 @@ class $TrialsTable extends Trials with TableInfo<$TrialsTable, TrialTable> {
         DriftSqlType.dateTime,
         data['${effectivePrefix}timestamp'],
       )!,
+      metadata: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}metadata'],
+      ),
     );
   }
 
@@ -714,6 +780,7 @@ class TrialTable extends DataClass implements Insertable<TrialTable> {
   final int reactionMs;
   final int difficulty;
   final DateTime timestamp;
+  final String? metadata;
   const TrialTable({
     required this.id,
     required this.sessionId,
@@ -723,6 +790,7 @@ class TrialTable extends DataClass implements Insertable<TrialTable> {
     required this.reactionMs,
     required this.difficulty,
     required this.timestamp,
+    this.metadata,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -735,6 +803,9 @@ class TrialTable extends DataClass implements Insertable<TrialTable> {
     map['reaction_ms'] = Variable<int>(reactionMs);
     map['difficulty'] = Variable<int>(difficulty);
     map['timestamp'] = Variable<DateTime>(timestamp);
+    if (!nullToAbsent || metadata != null) {
+      map['metadata'] = Variable<String>(metadata);
+    }
     return map;
   }
 
@@ -748,6 +819,9 @@ class TrialTable extends DataClass implements Insertable<TrialTable> {
       reactionMs: Value(reactionMs),
       difficulty: Value(difficulty),
       timestamp: Value(timestamp),
+      metadata: metadata == null && nullToAbsent
+          ? const Value.absent()
+          : Value(metadata),
     );
   }
 
@@ -765,6 +839,7 @@ class TrialTable extends DataClass implements Insertable<TrialTable> {
       reactionMs: serializer.fromJson<int>(json['reactionMs']),
       difficulty: serializer.fromJson<int>(json['difficulty']),
       timestamp: serializer.fromJson<DateTime>(json['timestamp']),
+      metadata: serializer.fromJson<String?>(json['metadata']),
     );
   }
   @override
@@ -779,6 +854,7 @@ class TrialTable extends DataClass implements Insertable<TrialTable> {
       'reactionMs': serializer.toJson<int>(reactionMs),
       'difficulty': serializer.toJson<int>(difficulty),
       'timestamp': serializer.toJson<DateTime>(timestamp),
+      'metadata': serializer.toJson<String?>(metadata),
     };
   }
 
@@ -791,6 +867,7 @@ class TrialTable extends DataClass implements Insertable<TrialTable> {
     int? reactionMs,
     int? difficulty,
     DateTime? timestamp,
+    Value<String?> metadata = const Value.absent(),
   }) => TrialTable(
     id: id ?? this.id,
     sessionId: sessionId ?? this.sessionId,
@@ -800,6 +877,7 @@ class TrialTable extends DataClass implements Insertable<TrialTable> {
     reactionMs: reactionMs ?? this.reactionMs,
     difficulty: difficulty ?? this.difficulty,
     timestamp: timestamp ?? this.timestamp,
+    metadata: metadata.present ? metadata.value : this.metadata,
   );
   TrialTable copyWithCompanion(TrialsCompanion data) {
     return TrialTable(
@@ -815,6 +893,7 @@ class TrialTable extends DataClass implements Insertable<TrialTable> {
           ? data.difficulty.value
           : this.difficulty,
       timestamp: data.timestamp.present ? data.timestamp.value : this.timestamp,
+      metadata: data.metadata.present ? data.metadata.value : this.metadata,
     );
   }
 
@@ -828,7 +907,8 @@ class TrialTable extends DataClass implements Insertable<TrialTable> {
           ..write('correct: $correct, ')
           ..write('reactionMs: $reactionMs, ')
           ..write('difficulty: $difficulty, ')
-          ..write('timestamp: $timestamp')
+          ..write('timestamp: $timestamp, ')
+          ..write('metadata: $metadata')
           ..write(')'))
         .toString();
   }
@@ -843,6 +923,7 @@ class TrialTable extends DataClass implements Insertable<TrialTable> {
     reactionMs,
     difficulty,
     timestamp,
+    metadata,
   );
   @override
   bool operator ==(Object other) =>
@@ -855,7 +936,8 @@ class TrialTable extends DataClass implements Insertable<TrialTable> {
           other.correct == this.correct &&
           other.reactionMs == this.reactionMs &&
           other.difficulty == this.difficulty &&
-          other.timestamp == this.timestamp);
+          other.timestamp == this.timestamp &&
+          other.metadata == this.metadata);
 }
 
 class TrialsCompanion extends UpdateCompanion<TrialTable> {
@@ -867,6 +949,7 @@ class TrialsCompanion extends UpdateCompanion<TrialTable> {
   final Value<int> reactionMs;
   final Value<int> difficulty;
   final Value<DateTime> timestamp;
+  final Value<String?> metadata;
   const TrialsCompanion({
     this.id = const Value.absent(),
     this.sessionId = const Value.absent(),
@@ -876,6 +959,7 @@ class TrialsCompanion extends UpdateCompanion<TrialTable> {
     this.reactionMs = const Value.absent(),
     this.difficulty = const Value.absent(),
     this.timestamp = const Value.absent(),
+    this.metadata = const Value.absent(),
   });
   TrialsCompanion.insert({
     this.id = const Value.absent(),
@@ -886,6 +970,7 @@ class TrialsCompanion extends UpdateCompanion<TrialTable> {
     required int reactionMs,
     required int difficulty,
     required DateTime timestamp,
+    this.metadata = const Value.absent(),
   }) : sessionId = Value(sessionId),
        trialNum = Value(trialNum),
        type = Value(type),
@@ -902,6 +987,7 @@ class TrialsCompanion extends UpdateCompanion<TrialTable> {
     Expression<int>? reactionMs,
     Expression<int>? difficulty,
     Expression<DateTime>? timestamp,
+    Expression<String>? metadata,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -912,6 +998,7 @@ class TrialsCompanion extends UpdateCompanion<TrialTable> {
       if (reactionMs != null) 'reaction_ms': reactionMs,
       if (difficulty != null) 'difficulty': difficulty,
       if (timestamp != null) 'timestamp': timestamp,
+      if (metadata != null) 'metadata': metadata,
     });
   }
 
@@ -924,6 +1011,7 @@ class TrialsCompanion extends UpdateCompanion<TrialTable> {
     Value<int>? reactionMs,
     Value<int>? difficulty,
     Value<DateTime>? timestamp,
+    Value<String?>? metadata,
   }) {
     return TrialsCompanion(
       id: id ?? this.id,
@@ -934,6 +1022,7 @@ class TrialsCompanion extends UpdateCompanion<TrialTable> {
       reactionMs: reactionMs ?? this.reactionMs,
       difficulty: difficulty ?? this.difficulty,
       timestamp: timestamp ?? this.timestamp,
+      metadata: metadata ?? this.metadata,
     );
   }
 
@@ -964,6 +1053,9 @@ class TrialsCompanion extends UpdateCompanion<TrialTable> {
     if (timestamp.present) {
       map['timestamp'] = Variable<DateTime>(timestamp.value);
     }
+    if (metadata.present) {
+      map['metadata'] = Variable<String>(metadata.value);
+    }
     return map;
   }
 
@@ -977,7 +1069,8 @@ class TrialsCompanion extends UpdateCompanion<TrialTable> {
           ..write('correct: $correct, ')
           ..write('reactionMs: $reactionMs, ')
           ..write('difficulty: $difficulty, ')
-          ..write('timestamp: $timestamp')
+          ..write('timestamp: $timestamp, ')
+          ..write('metadata: $metadata')
           ..write(')'))
         .toString();
   }
@@ -1277,6 +1370,7 @@ abstract class _$HebboDatabase extends GeneratedDatabase {
 typedef $$SessionsTableCreateCompanionBuilder =
     SessionsCompanion Function({
       Value<int> id,
+      Value<String> gameId,
       required int sessionNum,
       required DateTime startedAt,
       required DateTime endedAt,
@@ -1287,6 +1381,7 @@ typedef $$SessionsTableCreateCompanionBuilder =
 typedef $$SessionsTableUpdateCompanionBuilder =
     SessionsCompanion Function({
       Value<int> id,
+      Value<String> gameId,
       Value<int> sessionNum,
       Value<DateTime> startedAt,
       Value<DateTime> endedAt,
@@ -1330,6 +1425,11 @@ class $$SessionsTableFilterComposer
   });
   ColumnFilters<int> get id => $composableBuilder(
     column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get gameId => $composableBuilder(
+    column: $table.gameId,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -1403,6 +1503,11 @@ class $$SessionsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get gameId => $composableBuilder(
+    column: $table.gameId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<int> get sessionNum => $composableBuilder(
     column: $table.sessionNum,
     builder: (column) => ColumnOrderings(column),
@@ -1445,6 +1550,9 @@ class $$SessionsTableAnnotationComposer
   });
   GeneratedColumn<int> get id =>
       $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get gameId =>
+      $composableBuilder(column: $table.gameId, builder: (column) => column);
 
   GeneratedColumn<int> get sessionNum => $composableBuilder(
     column: $table.sessionNum,
@@ -1527,6 +1635,7 @@ class $$SessionsTableTableManager
           updateCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
+                Value<String> gameId = const Value.absent(),
                 Value<int> sessionNum = const Value.absent(),
                 Value<DateTime> startedAt = const Value.absent(),
                 Value<DateTime> endedAt = const Value.absent(),
@@ -1535,6 +1644,7 @@ class $$SessionsTableTableManager
                 Value<int> environmentTier = const Value.absent(),
               }) => SessionsCompanion(
                 id: id,
+                gameId: gameId,
                 sessionNum: sessionNum,
                 startedAt: startedAt,
                 endedAt: endedAt,
@@ -1545,6 +1655,7 @@ class $$SessionsTableTableManager
           createCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
+                Value<String> gameId = const Value.absent(),
                 required int sessionNum,
                 required DateTime startedAt,
                 required DateTime endedAt,
@@ -1553,6 +1664,7 @@ class $$SessionsTableTableManager
                 required int environmentTier,
               }) => SessionsCompanion.insert(
                 id: id,
+                gameId: gameId,
                 sessionNum: sessionNum,
                 startedAt: startedAt,
                 endedAt: endedAt,
@@ -1622,6 +1734,7 @@ typedef $$TrialsTableCreateCompanionBuilder =
       required int reactionMs,
       required int difficulty,
       required DateTime timestamp,
+      Value<String?> metadata,
     });
 typedef $$TrialsTableUpdateCompanionBuilder =
     TrialsCompanion Function({
@@ -1633,6 +1746,7 @@ typedef $$TrialsTableUpdateCompanionBuilder =
       Value<int> reactionMs,
       Value<int> difficulty,
       Value<DateTime> timestamp,
+      Value<String?> metadata,
     });
 
 final class $$TrialsTableReferences
@@ -1698,6 +1812,11 @@ class $$TrialsTableFilterComposer
 
   ColumnFilters<DateTime> get timestamp => $composableBuilder(
     column: $table.timestamp,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get metadata => $composableBuilder(
+    column: $table.metadata,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -1769,6 +1888,11 @@ class $$TrialsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get metadata => $composableBuilder(
+    column: $table.metadata,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   $$SessionsTableOrderingComposer get sessionId {
     final $$SessionsTableOrderingComposer composer = $composerBuilder(
       composer: this,
@@ -1826,6 +1950,9 @@ class $$TrialsTableAnnotationComposer
 
   GeneratedColumn<DateTime> get timestamp =>
       $composableBuilder(column: $table.timestamp, builder: (column) => column);
+
+  GeneratedColumn<String> get metadata =>
+      $composableBuilder(column: $table.metadata, builder: (column) => column);
 
   $$SessionsTableAnnotationComposer get sessionId {
     final $$SessionsTableAnnotationComposer composer = $composerBuilder(
@@ -1887,6 +2014,7 @@ class $$TrialsTableTableManager
                 Value<int> reactionMs = const Value.absent(),
                 Value<int> difficulty = const Value.absent(),
                 Value<DateTime> timestamp = const Value.absent(),
+                Value<String?> metadata = const Value.absent(),
               }) => TrialsCompanion(
                 id: id,
                 sessionId: sessionId,
@@ -1896,6 +2024,7 @@ class $$TrialsTableTableManager
                 reactionMs: reactionMs,
                 difficulty: difficulty,
                 timestamp: timestamp,
+                metadata: metadata,
               ),
           createCompanionCallback:
               ({
@@ -1907,6 +2036,7 @@ class $$TrialsTableTableManager
                 required int reactionMs,
                 required int difficulty,
                 required DateTime timestamp,
+                Value<String?> metadata = const Value.absent(),
               }) => TrialsCompanion.insert(
                 id: id,
                 sessionId: sessionId,
@@ -1916,6 +2046,7 @@ class $$TrialsTableTableManager
                 reactionMs: reactionMs,
                 difficulty: difficulty,
                 timestamp: timestamp,
+                metadata: metadata,
               ),
           withReferenceMapper: (p0) => p0
               .map(

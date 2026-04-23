@@ -14,6 +14,7 @@ class DriftSessionRepository implements ISessionRepository {
         .into(db.sessions)
         .insert(
           SessionsCompanion(
+            gameId: Value(session.gameId),
             sessionNum: Value(session.sessionNum),
             startedAt: Value(session.startedAt),
             endedAt: Value(session.endedAt),
@@ -33,6 +34,29 @@ class DriftSessionRepository implements ISessionRepository {
         .map(
           (row) => SessionEntity(
             id: row.id,
+            gameId: row.gameId,
+            sessionNum: row.sessionNum,
+            startedAt: row.startedAt,
+            endedAt: row.endedAt,
+            startingLevel: row.startingLevel,
+            endingLevel: row.endingLevel,
+            environmentTier: row.environmentTier,
+          ),
+        )
+        .toList();
+  }
+
+  @override
+  Future<List<SessionEntity>> getSessionsByGame(String gameId) async {
+    final query = db.select(db.sessions)
+      ..where((t) => t.gameId.equals(gameId))
+      ..orderBy([(t) => OrderingTerm.desc(t.startedAt)]);
+    final rows = await query.get();
+    return rows
+        .map(
+          (row) => SessionEntity(
+            id: row.id,
+            gameId: row.gameId,
             sessionNum: row.sessionNum,
             startedAt: row.startedAt,
             endedAt: row.endedAt,

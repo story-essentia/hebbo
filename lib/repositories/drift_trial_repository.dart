@@ -21,6 +21,7 @@ class DriftTrialRepository implements ITrialRepository {
             reactionMs: Value(trial.reactionMs),
             difficulty: Value(trial.difficulty),
             timestamp: Value(trial.timestamp),
+            metadata: Value(trial.metadata),
           ),
         );
   }
@@ -41,6 +42,7 @@ class DriftTrialRepository implements ITrialRepository {
             reactionMs: row.reactionMs,
             difficulty: row.difficulty,
             timestamp: row.timestamp,
+            metadata: row.metadata,
           ),
         )
         .toList();
