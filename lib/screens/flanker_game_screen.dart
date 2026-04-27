@@ -10,7 +10,9 @@ import 'package:hebbo/widgets/fish_row_widget.dart';
 import 'package:hebbo/widgets/backgrounds/environment_factory.dart';
 import 'package:hebbo/widgets/backgrounds/animated_background_wrapper.dart';
 import 'package:hebbo/widgets/backgrounds/environment_transitioner.dart';
+import 'package:hebbo/providers/notification_provider.dart';
 import 'package:hebbo/providers/audio_provider.dart';
+import 'package:hebbo/widgets/game_countdown_overlay.dart';
 
 class FlankerGameScreen extends ConsumerStatefulWidget {
   const FlankerGameScreen({super.key});
@@ -237,6 +239,12 @@ class _FlankerGameScreenState extends ConsumerState<FlankerGameScreen> {
                 ),
               ),
             ),
+
+          // Countdown Overlay
+          GameCountdownOverlay(
+            countdownValue: state.countdownValue,
+            isVisible: state.isCountingDown,
+          ),
         ],
       ),
     );

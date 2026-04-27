@@ -50,6 +50,7 @@ class FlankerGameNotifier extends StateNotifier<FlankerSessionState> {
   final ISessionRepository _sessionRepo;
 
   Timer? _timeoutTimer;
+  Timer? _countdownTimer;
   final Stopwatch _stopwatch = Stopwatch();
   DateTime? _sessionStartTime;
   int _initialLevel = 1;
@@ -90,12 +91,29 @@ class FlankerGameNotifier extends StateNotifier<FlankerSessionState> {
     _initialLevel = initialLevel;
     _adaptiveEngine.reset(initialLevel);
 
-    // Start with all fish in top-down state before the first trial
-    state = const FlankerSessionState(trialsRemaining: 75, isPreTrial: true);
+    // Initial state: Pre-trial + Countdown 3
+    state = const FlankerSessionState(
+      trialsRemaining: 75,
+      isPreTrial: true,
+      isCountingDown: true,
+      countdownValue: 3,
+    );
 
-    // Hold in top-down for a moment, then begin the first trial
-    Future.delayed(const Duration(milliseconds: _preTrialHoldMs), () {
-      if (mounted) _nextTrial(initialLevel);
+    _countdownTimer?.cancel();
+    _countdownTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (!mounted) {
+        timer.cancel();
+        return;
+      }
+
+      final newValue = state.countdownValue - 1;
+      if (newValue <= 0) {
+        timer.cancel();
+        state = state.copyWith(isCountingDown: false, countdownValue: 0);
+        _nextTrial(initialLevel);
+      } else {
+        state = state.copyWith(countdownValue: newValue);
+      }
     });
   }
 
@@ -330,6 +348,7 @@ class FlankerGameNotifier extends StateNotifier<FlankerSessionState> {
   @override
   void dispose() {
     _timeoutTimer?.cancel();
+    _countdownTimer?.cancel();
     super.dispose();
   }
 }
