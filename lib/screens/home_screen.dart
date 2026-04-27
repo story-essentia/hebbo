@@ -3,6 +3,7 @@ import 'package:hebbo/theme/app_theme.dart';
 import 'package:hebbo/widgets/about_hebbo_sheet.dart';
 import 'package:hebbo/widgets/flanker_detail_sheet.dart';
 import 'package:hebbo/widgets/task_switch_detail_sheet.dart';
+import 'package:hebbo/widgets/spatial_span_detail_sheet.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -20,6 +21,15 @@ class HomeScreen extends StatelessWidget {
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (context) => const TaskSwitchDetailSheet(),
+    );
+  }
+
+  void _showSpatialSpanDetail(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => const SpatialSpanDetailSheet(),
     );
   }
 
@@ -64,9 +74,10 @@ class HomeScreen extends StatelessWidget {
               _buildGameCard(
                 context: context,
                 title: 'Spatial Span',
-                subtitle: 'Coming soon',
+                subtitle: 'Visual-Spatial Memory',
                 icon: Icons.grid_view,
-                isActive: false,
+                isActive: true,
+                onTap: () => _showSpatialSpanDetail(context),
               ),
               const Spacer(),
               Center(
