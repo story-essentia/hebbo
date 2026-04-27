@@ -9,6 +9,7 @@ import 'package:hebbo/providers/audio_provider.dart';
 import 'package:hebbo/state/task_switch_state.dart';
 import 'package:hebbo/widgets/neon_orb_widget.dart';
 import 'package:hebbo/widgets/particle_background.dart';
+import 'package:hebbo/widgets/game_countdown_overlay.dart';
 
 class TaskSwitchScreen extends ConsumerStatefulWidget {
   const TaskSwitchScreen({super.key});
@@ -216,6 +217,12 @@ class _TaskSwitchScreenState extends ConsumerState<TaskSwitchScreen> {
                 ),
               ),
             ),
+
+          // Countdown Overlay
+          GameCountdownOverlay(
+            countdownValue: state.countdownValue,
+            isVisible: state.isCountingDown,
+          ),
         ],
       ),
     );

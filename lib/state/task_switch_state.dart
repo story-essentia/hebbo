@@ -29,6 +29,9 @@ class TaskSwitchState {
   final int? switchCostMs;
   final String? saveError;
 
+  final bool isCountingDown;
+  final int countdownValue;
+
   const TaskSwitchState({
     this.trialsRemaining = 0,
     this.isStimulusActive = false,
@@ -43,6 +46,8 @@ class TaskSwitchState {
     this.bufferedTrials = const [],
     this.switchCostMs,
     this.saveError,
+    this.isCountingDown = false,
+    this.countdownValue = 0,
   });
 
   TaskSwitchState copyWith({
@@ -59,6 +64,8 @@ class TaskSwitchState {
     List<Map<String, dynamic>>? bufferedTrials,
     int? switchCostMs,
     String? saveError,
+    bool? isCountingDown,
+    int? countdownValue,
   }) {
     return TaskSwitchState(
       trialsRemaining: trialsRemaining ?? this.trialsRemaining,
@@ -74,6 +81,8 @@ class TaskSwitchState {
       bufferedTrials: bufferedTrials ?? this.bufferedTrials,
       switchCostMs: switchCostMs ?? this.switchCostMs,
       saveError: saveError ?? this.saveError,
+      isCountingDown: isCountingDown ?? this.isCountingDown,
+      countdownValue: countdownValue ?? this.countdownValue,
     );
   }
 }

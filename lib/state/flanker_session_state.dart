@@ -40,6 +40,9 @@ class FlankerSessionState {
   final bool isPersisted;
   final String? saveError;
 
+  final bool isCountingDown;
+  final int countdownValue;
+
   const FlankerSessionState({
     this.trialsRemaining = 75,
     this.currentStimulus,
@@ -54,6 +57,8 @@ class FlankerSessionState {
     this.isPaused = false,
     this.isPersisted = true,
     this.saveError,
+    this.isCountingDown = false,
+    this.countdownValue = 0,
   });
 
   FlankerSessionState copyWith({
@@ -70,6 +75,8 @@ class FlankerSessionState {
     bool? isPaused,
     bool? isPersisted,
     String? saveError,
+    bool? isCountingDown,
+    int? countdownValue,
   }) {
     return FlankerSessionState(
       trialsRemaining: trialsRemaining ?? this.trialsRemaining,
@@ -85,6 +92,8 @@ class FlankerSessionState {
       isPaused: isPaused ?? this.isPaused,
       isPersisted: isPersisted ?? this.isPersisted,
       saveError: saveError ?? this.saveError,
+      isCountingDown: isCountingDown ?? this.isCountingDown,
+      countdownValue: countdownValue ?? this.countdownValue,
     );
   }
 }

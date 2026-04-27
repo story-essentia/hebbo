@@ -38,6 +38,7 @@ class TaskSwitchGameNotifier extends StateNotifier<TaskSwitchState> {
   final ISessionRepository _sessionRepo;
 
   Timer? _timeoutTimer;
+  Timer? _countdownTimer;
   final Stopwatch _stopwatch = Stopwatch();
   DateTime? _sessionStartTime;
   int _initialLevel = 1;
@@ -69,8 +70,28 @@ class TaskSwitchGameNotifier extends StateNotifier<TaskSwitchState> {
     _adaptiveEngine.reset(initialLevel);
     _generator.reset();
 
-    state = const TaskSwitchState(trialsRemaining: 75);
-    _nextTrial(initialLevel);
+    state = const TaskSwitchState(
+      trialsRemaining: 75,
+      isCountingDown: true,
+      countdownValue: 3,
+    );
+
+    _countdownTimer?.cancel();
+    _countdownTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (!mounted) {
+        timer.cancel();
+        return;
+      }
+
+      final newValue = state.countdownValue - 1;
+      if (newValue <= 0) {
+        timer.cancel();
+        state = state.copyWith(isCountingDown: false, countdownValue: 0);
+        _nextTrial(initialLevel);
+      } else {
+        state = state.copyWith(countdownValue: newValue);
+      }
+    });
   }
 
   void _nextTrial(int level) {
@@ -239,6 +260,7 @@ class TaskSwitchGameNotifier extends StateNotifier<TaskSwitchState> {
   @override
   void dispose() {
     _timeoutTimer?.cancel();
+    _countdownTimer?.cancel();
     super.dispose();
   }
 }
