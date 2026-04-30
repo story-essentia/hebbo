@@ -1348,6 +1348,324 @@ class DifficultyStatesCompanion extends UpdateCompanion<DifficultyTable> {
   }
 }
 
+class $SpatialSpanProgressTableTable extends SpatialSpanProgressTable
+    with TableInfo<$SpatialSpanProgressTableTable, SpatialSpanProgress> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $SpatialSpanProgressTableTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _trackIdMeta = const VerificationMeta(
+    'trackId',
+  );
+  @override
+  late final GeneratedColumn<int> trackId = GeneratedColumn<int>(
+    'track_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _maxSpanReachedMeta = const VerificationMeta(
+    'maxSpanReached',
+  );
+  @override
+  late final GeneratedColumn<int> maxSpanReached = GeneratedColumn<int>(
+    'max_span_reached',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(2),
+  );
+  static const VerificationMeta _lastPlayedAtMeta = const VerificationMeta(
+    'lastPlayedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> lastPlayedAt = GeneratedColumn<DateTime>(
+    'last_played_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    trackId,
+    maxSpanReached,
+    lastPlayedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'spatial_span_progress_table';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<SpatialSpanProgress> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('track_id')) {
+      context.handle(
+        _trackIdMeta,
+        trackId.isAcceptableOrUnknown(data['track_id']!, _trackIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_trackIdMeta);
+    }
+    if (data.containsKey('max_span_reached')) {
+      context.handle(
+        _maxSpanReachedMeta,
+        maxSpanReached.isAcceptableOrUnknown(
+          data['max_span_reached']!,
+          _maxSpanReachedMeta,
+        ),
+      );
+    }
+    if (data.containsKey('last_played_at')) {
+      context.handle(
+        _lastPlayedAtMeta,
+        lastPlayedAt.isAcceptableOrUnknown(
+          data['last_played_at']!,
+          _lastPlayedAtMeta,
+        ),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  SpatialSpanProgress map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return SpatialSpanProgress(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      trackId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}track_id'],
+      )!,
+      maxSpanReached: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}max_span_reached'],
+      )!,
+      lastPlayedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}last_played_at'],
+      ),
+    );
+  }
+
+  @override
+  $SpatialSpanProgressTableTable createAlias(String alias) {
+    return $SpatialSpanProgressTableTable(attachedDatabase, alias);
+  }
+}
+
+class SpatialSpanProgress extends DataClass
+    implements Insertable<SpatialSpanProgress> {
+  final int id;
+  final int trackId;
+  final int maxSpanReached;
+  final DateTime? lastPlayedAt;
+  const SpatialSpanProgress({
+    required this.id,
+    required this.trackId,
+    required this.maxSpanReached,
+    this.lastPlayedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['track_id'] = Variable<int>(trackId);
+    map['max_span_reached'] = Variable<int>(maxSpanReached);
+    if (!nullToAbsent || lastPlayedAt != null) {
+      map['last_played_at'] = Variable<DateTime>(lastPlayedAt);
+    }
+    return map;
+  }
+
+  SpatialSpanProgressTableCompanion toCompanion(bool nullToAbsent) {
+    return SpatialSpanProgressTableCompanion(
+      id: Value(id),
+      trackId: Value(trackId),
+      maxSpanReached: Value(maxSpanReached),
+      lastPlayedAt: lastPlayedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(lastPlayedAt),
+    );
+  }
+
+  factory SpatialSpanProgress.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return SpatialSpanProgress(
+      id: serializer.fromJson<int>(json['id']),
+      trackId: serializer.fromJson<int>(json['trackId']),
+      maxSpanReached: serializer.fromJson<int>(json['maxSpanReached']),
+      lastPlayedAt: serializer.fromJson<DateTime?>(json['lastPlayedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'trackId': serializer.toJson<int>(trackId),
+      'maxSpanReached': serializer.toJson<int>(maxSpanReached),
+      'lastPlayedAt': serializer.toJson<DateTime?>(lastPlayedAt),
+    };
+  }
+
+  SpatialSpanProgress copyWith({
+    int? id,
+    int? trackId,
+    int? maxSpanReached,
+    Value<DateTime?> lastPlayedAt = const Value.absent(),
+  }) => SpatialSpanProgress(
+    id: id ?? this.id,
+    trackId: trackId ?? this.trackId,
+    maxSpanReached: maxSpanReached ?? this.maxSpanReached,
+    lastPlayedAt: lastPlayedAt.present ? lastPlayedAt.value : this.lastPlayedAt,
+  );
+  SpatialSpanProgress copyWithCompanion(
+    SpatialSpanProgressTableCompanion data,
+  ) {
+    return SpatialSpanProgress(
+      id: data.id.present ? data.id.value : this.id,
+      trackId: data.trackId.present ? data.trackId.value : this.trackId,
+      maxSpanReached: data.maxSpanReached.present
+          ? data.maxSpanReached.value
+          : this.maxSpanReached,
+      lastPlayedAt: data.lastPlayedAt.present
+          ? data.lastPlayedAt.value
+          : this.lastPlayedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SpatialSpanProgress(')
+          ..write('id: $id, ')
+          ..write('trackId: $trackId, ')
+          ..write('maxSpanReached: $maxSpanReached, ')
+          ..write('lastPlayedAt: $lastPlayedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, trackId, maxSpanReached, lastPlayedAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is SpatialSpanProgress &&
+          other.id == this.id &&
+          other.trackId == this.trackId &&
+          other.maxSpanReached == this.maxSpanReached &&
+          other.lastPlayedAt == this.lastPlayedAt);
+}
+
+class SpatialSpanProgressTableCompanion
+    extends UpdateCompanion<SpatialSpanProgress> {
+  final Value<int> id;
+  final Value<int> trackId;
+  final Value<int> maxSpanReached;
+  final Value<DateTime?> lastPlayedAt;
+  const SpatialSpanProgressTableCompanion({
+    this.id = const Value.absent(),
+    this.trackId = const Value.absent(),
+    this.maxSpanReached = const Value.absent(),
+    this.lastPlayedAt = const Value.absent(),
+  });
+  SpatialSpanProgressTableCompanion.insert({
+    this.id = const Value.absent(),
+    required int trackId,
+    this.maxSpanReached = const Value.absent(),
+    this.lastPlayedAt = const Value.absent(),
+  }) : trackId = Value(trackId);
+  static Insertable<SpatialSpanProgress> custom({
+    Expression<int>? id,
+    Expression<int>? trackId,
+    Expression<int>? maxSpanReached,
+    Expression<DateTime>? lastPlayedAt,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (trackId != null) 'track_id': trackId,
+      if (maxSpanReached != null) 'max_span_reached': maxSpanReached,
+      if (lastPlayedAt != null) 'last_played_at': lastPlayedAt,
+    });
+  }
+
+  SpatialSpanProgressTableCompanion copyWith({
+    Value<int>? id,
+    Value<int>? trackId,
+    Value<int>? maxSpanReached,
+    Value<DateTime?>? lastPlayedAt,
+  }) {
+    return SpatialSpanProgressTableCompanion(
+      id: id ?? this.id,
+      trackId: trackId ?? this.trackId,
+      maxSpanReached: maxSpanReached ?? this.maxSpanReached,
+      lastPlayedAt: lastPlayedAt ?? this.lastPlayedAt,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (trackId.present) {
+      map['track_id'] = Variable<int>(trackId.value);
+    }
+    if (maxSpanReached.present) {
+      map['max_span_reached'] = Variable<int>(maxSpanReached.value);
+    }
+    if (lastPlayedAt.present) {
+      map['last_played_at'] = Variable<DateTime>(lastPlayedAt.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SpatialSpanProgressTableCompanion(')
+          ..write('id: $id, ')
+          ..write('trackId: $trackId, ')
+          ..write('maxSpanReached: $maxSpanReached, ')
+          ..write('lastPlayedAt: $lastPlayedAt')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$HebboDatabase extends GeneratedDatabase {
   _$HebboDatabase(QueryExecutor e) : super(e);
   $HebboDatabaseManager get managers => $HebboDatabaseManager(this);
@@ -1356,6 +1674,8 @@ abstract class _$HebboDatabase extends GeneratedDatabase {
   late final $DifficultyStatesTable difficultyStates = $DifficultyStatesTable(
     this,
   );
+  late final $SpatialSpanProgressTableTable spatialSpanProgressTable =
+      $SpatialSpanProgressTableTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -1364,6 +1684,7 @@ abstract class _$HebboDatabase extends GeneratedDatabase {
     sessions,
     trials,
     difficultyStates,
+    spatialSpanProgressTable,
   ];
 }
 
@@ -2287,6 +2608,204 @@ typedef $$DifficultyStatesTableProcessedTableManager =
       DifficultyTable,
       PrefetchHooks Function()
     >;
+typedef $$SpatialSpanProgressTableTableCreateCompanionBuilder =
+    SpatialSpanProgressTableCompanion Function({
+      Value<int> id,
+      required int trackId,
+      Value<int> maxSpanReached,
+      Value<DateTime?> lastPlayedAt,
+    });
+typedef $$SpatialSpanProgressTableTableUpdateCompanionBuilder =
+    SpatialSpanProgressTableCompanion Function({
+      Value<int> id,
+      Value<int> trackId,
+      Value<int> maxSpanReached,
+      Value<DateTime?> lastPlayedAt,
+    });
+
+class $$SpatialSpanProgressTableTableFilterComposer
+    extends Composer<_$HebboDatabase, $SpatialSpanProgressTableTable> {
+  $$SpatialSpanProgressTableTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get trackId => $composableBuilder(
+    column: $table.trackId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get maxSpanReached => $composableBuilder(
+    column: $table.maxSpanReached,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get lastPlayedAt => $composableBuilder(
+    column: $table.lastPlayedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$SpatialSpanProgressTableTableOrderingComposer
+    extends Composer<_$HebboDatabase, $SpatialSpanProgressTableTable> {
+  $$SpatialSpanProgressTableTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get trackId => $composableBuilder(
+    column: $table.trackId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get maxSpanReached => $composableBuilder(
+    column: $table.maxSpanReached,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get lastPlayedAt => $composableBuilder(
+    column: $table.lastPlayedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$SpatialSpanProgressTableTableAnnotationComposer
+    extends Composer<_$HebboDatabase, $SpatialSpanProgressTableTable> {
+  $$SpatialSpanProgressTableTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<int> get trackId =>
+      $composableBuilder(column: $table.trackId, builder: (column) => column);
+
+  GeneratedColumn<int> get maxSpanReached => $composableBuilder(
+    column: $table.maxSpanReached,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get lastPlayedAt => $composableBuilder(
+    column: $table.lastPlayedAt,
+    builder: (column) => column,
+  );
+}
+
+class $$SpatialSpanProgressTableTableTableManager
+    extends
+        RootTableManager<
+          _$HebboDatabase,
+          $SpatialSpanProgressTableTable,
+          SpatialSpanProgress,
+          $$SpatialSpanProgressTableTableFilterComposer,
+          $$SpatialSpanProgressTableTableOrderingComposer,
+          $$SpatialSpanProgressTableTableAnnotationComposer,
+          $$SpatialSpanProgressTableTableCreateCompanionBuilder,
+          $$SpatialSpanProgressTableTableUpdateCompanionBuilder,
+          (
+            SpatialSpanProgress,
+            BaseReferences<
+              _$HebboDatabase,
+              $SpatialSpanProgressTableTable,
+              SpatialSpanProgress
+            >,
+          ),
+          SpatialSpanProgress,
+          PrefetchHooks Function()
+        > {
+  $$SpatialSpanProgressTableTableTableManager(
+    _$HebboDatabase db,
+    $SpatialSpanProgressTableTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$SpatialSpanProgressTableTableFilterComposer(
+                $db: db,
+                $table: table,
+              ),
+          createOrderingComposer: () =>
+              $$SpatialSpanProgressTableTableOrderingComposer(
+                $db: db,
+                $table: table,
+              ),
+          createComputedFieldComposer: () =>
+              $$SpatialSpanProgressTableTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<int> trackId = const Value.absent(),
+                Value<int> maxSpanReached = const Value.absent(),
+                Value<DateTime?> lastPlayedAt = const Value.absent(),
+              }) => SpatialSpanProgressTableCompanion(
+                id: id,
+                trackId: trackId,
+                maxSpanReached: maxSpanReached,
+                lastPlayedAt: lastPlayedAt,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required int trackId,
+                Value<int> maxSpanReached = const Value.absent(),
+                Value<DateTime?> lastPlayedAt = const Value.absent(),
+              }) => SpatialSpanProgressTableCompanion.insert(
+                id: id,
+                trackId: trackId,
+                maxSpanReached: maxSpanReached,
+                lastPlayedAt: lastPlayedAt,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$SpatialSpanProgressTableTableProcessedTableManager =
+    ProcessedTableManager<
+      _$HebboDatabase,
+      $SpatialSpanProgressTableTable,
+      SpatialSpanProgress,
+      $$SpatialSpanProgressTableTableFilterComposer,
+      $$SpatialSpanProgressTableTableOrderingComposer,
+      $$SpatialSpanProgressTableTableAnnotationComposer,
+      $$SpatialSpanProgressTableTableCreateCompanionBuilder,
+      $$SpatialSpanProgressTableTableUpdateCompanionBuilder,
+      (
+        SpatialSpanProgress,
+        BaseReferences<
+          _$HebboDatabase,
+          $SpatialSpanProgressTableTable,
+          SpatialSpanProgress
+        >,
+      ),
+      SpatialSpanProgress,
+      PrefetchHooks Function()
+    >;
 
 class $HebboDatabaseManager {
   final _$HebboDatabase _db;
@@ -2297,4 +2816,9 @@ class $HebboDatabaseManager {
       $$TrialsTableTableManager(_db, _db.trials);
   $$DifficultyStatesTableTableManager get difficultyStates =>
       $$DifficultyStatesTableTableManager(_db, _db.difficultyStates);
+  $$SpatialSpanProgressTableTableTableManager get spatialSpanProgressTable =>
+      $$SpatialSpanProgressTableTableTableManager(
+        _db,
+        _db.spatialSpanProgressTable,
+      );
 }

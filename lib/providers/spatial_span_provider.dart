@@ -3,23 +3,31 @@ import 'dart:math' as math;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hebbo/state/spatial_span_state.dart';
 
-final spatialSpanProvider = StateNotifierProvider<SpatialSpanNotifier, SpatialSpanState>((ref) {
-  return SpatialSpanNotifier();
-});
+import 'package:hebbo/providers/spatial_span_progress_provider.dart';
+
+final spatialSpanProvider =
+    StateNotifierProvider<SpatialSpanNotifier, SpatialSpanState>((ref) {
+      return SpatialSpanNotifier(ref);
+    });
 
 class SpatialSpanNotifier extends StateNotifier<SpatialSpanState> {
-  SpatialSpanNotifier() : super(const SpatialSpanState());
+  final Ref _ref;
+
+  SpatialSpanNotifier(this._ref) : super(const SpatialSpanState());
 
   Timer? _demonstrationTimer;
+  Timer? _noiseTimer;
   int _currentDemoIndex = 0;
+  final math.Random _random = math.Random();
 
-  void startSession() {
+  void startSession({int trackId = 1, int startingSpan = 3}) {
     // Generate 9 random positions in a 4x4 grid (0-15)
     final allPositions = List.generate(16, (i) => i)..shuffle();
     final shardPositions = allPositions.take(9).toList();
 
     state = SpatialSpanState(
-      span: 3,
+      trackId: trackId,
+      span: startingSpan,
       shardPositions: shardPositions,
       phase: GamePhase.idle,
       isCountingDown: true,
@@ -44,12 +52,13 @@ class SpatialSpanNotifier extends StateNotifier<SpatialSpanState> {
 
   void togglePause() {
     if (state.isCountingDown || state.phase == GamePhase.complete) return;
-    
+
     final newPaused = !state.isPaused;
     state = state.copyWith(isPaused: newPaused);
-    
+
     if (newPaused) {
       _demonstrationTimer?.cancel();
+      _noiseTimer?.cancel();
     } else {
       if (state.phase == GamePhase.demonstration) {
         _runDemonstration();
@@ -59,7 +68,7 @@ class SpatialSpanNotifier extends StateNotifier<SpatialSpanState> {
 
   void _startNextTrial() {
     final sequence = _generateSequence(state.span);
-    
+
     state = state.copyWith(
       currentSequence: sequence,
       userSequence: [],
@@ -79,13 +88,23 @@ class SpatialSpanNotifier extends StateNotifier<SpatialSpanState> {
 
   void _runDemonstration() {
     _demonstrationTimer?.cancel();
-    
-    _demonstrationTimer = Timer.periodic(const Duration(milliseconds: 1200), (timer) {
+    _noiseTimer?.cancel();
+
+    // Setup noise for Track 2
+    if (state.trackId == 2) {
+      _startNoiseTimer();
+    }
+
+    _demonstrationTimer = Timer.periodic(const Duration(milliseconds: 1200), (
+      timer,
+    ) {
       if (_currentDemoIndex >= state.currentSequence.length) {
         timer.cancel();
+        _noiseTimer?.cancel();
         state = state.copyWith(
           phase: GamePhase.recall,
           activeShardIndex: null,
+          noiseShardIndex: null,
         );
         return;
       }
@@ -93,7 +112,7 @@ class SpatialSpanNotifier extends StateNotifier<SpatialSpanState> {
       // Step 1: Light up the shard
       final shardIdx = state.currentSequence[_currentDemoIndex];
       state = state.copyWith(activeShardIndex: shardIdx);
-      
+
       // Step 2: Turn it off after 800ms so there is a visual gap
       Future.delayed(const Duration(milliseconds: 800), () {
         if (mounted && state.activeShardIndex == shardIdx) {
@@ -105,6 +124,39 @@ class SpatialSpanNotifier extends StateNotifier<SpatialSpanState> {
     });
   }
 
+  void _startNoiseTimer() {
+    _noiseTimer?.cancel();
+
+    final nextInterval = 300 + _random.nextInt(500); // 300ms to 800ms
+    _noiseTimer = Timer(Duration(milliseconds: nextInterval), () {
+      if (state.phase != GamePhase.demonstration || state.isPaused) return;
+
+      // Pick a random shard that is NOT the active target
+      final availableShards = List<int>.from(state.shardPositions)
+        ..remove(state.activeShardIndex);
+
+      if (availableShards.isNotEmpty) {
+        final randomShard =
+            availableShards[_random.nextInt(availableShards.length)];
+
+        // Random scale between 1.1 and 1.3 to create a subtle expanding pulse
+        final scale = 1.1 + (_random.nextDouble() * 0.2);
+
+        state = state.copyWith(noiseShardIndex: randomShard, noiseScale: scale);
+
+        // Turn off noise after brief pulse
+        Future.delayed(const Duration(milliseconds: 250), () {
+          if (mounted && state.noiseShardIndex == randomShard) {
+            state = state.copyWith(noiseShardIndex: null);
+          }
+        });
+      }
+
+      // Re-trigger recursively
+      _startNoiseTimer();
+    });
+  }
+
   void handleShardTap(int index) {
     if (state.phase != GamePhase.recall || state.isPaused) return;
 
@@ -113,7 +165,7 @@ class SpatialSpanNotifier extends StateNotifier<SpatialSpanState> {
 
     if (index == nextExpectedIndex) {
       state = state.copyWith(userSequence: newUserSequence);
-      
+
       if (newUserSequence.length == state.currentSequence.length) {
         _handleTrialResult(true);
       }
@@ -138,8 +190,15 @@ class SpatialSpanNotifier extends StateNotifier<SpatialSpanState> {
 
       if (newSuccesses == 2) {
         // Level up
+        final nextSpan = state.span + 1;
+
+        // Save progression to DB
+        _ref
+            .read(spatialSpanProgressProvider.notifier)
+            .updateMaxSpan(state.trackId, nextSpan);
+
         state = state.copyWith(
-          span: state.span + 1,
+          span: nextSpan,
           successesInLevel: 0,
           trialsInLevel: 0,
         );
@@ -157,6 +216,7 @@ class SpatialSpanNotifier extends StateNotifier<SpatialSpanState> {
   @override
   void dispose() {
     _demonstrationTimer?.cancel();
+    _noiseTimer?.cancel();
     super.dispose();
   }
 }

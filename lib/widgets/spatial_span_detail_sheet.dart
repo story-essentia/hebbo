@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hebbo/theme/app_theme.dart';
 import 'package:hebbo/screens/spatial_span_screen.dart';
+import 'package:hebbo/screens/nebula_map_screen.dart';
 
 class SpatialSpanDetailSheet extends StatelessWidget {
   const SpatialSpanDetailSheet({super.key});
@@ -71,7 +72,7 @@ class SpatialSpanDetailSheet extends StatelessWidget {
               Navigator.pop(context);
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => const SpatialSpanScreen()),
+                MaterialPageRoute(builder: (context) => const NebulaMapScreen()),
               );
             },
             style: ElevatedButton.styleFrom(

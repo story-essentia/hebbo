@@ -1,6 +1,6 @@
 # hebbo Development Guidelines
 
-Auto-generated from all feature plans. Last updated: 2026-04-27
+Auto-generated from all feature plans. Last updated: 2026-04-28
 
 ## Active Technologies
 - Flutter 3.x, Dart 3.x + `flutter_riverpod` (state), `drift` (persistence), `test` (unit verification) (002-adaptive-difficulty-engine)
@@ -22,6 +22,8 @@ Auto-generated from all feature plans. Last updated: 2026-04-27
 - On-device only (persist nothing for countdown) (012-game-start-countdown)
 - Dart 3.x / Flutter 3.x + flutter_riverpod, just_audio, path_provider (standard stack) (013-spatial-span-game)
 - On-device only (SQLite via established repo patterns) (013-spatial-span-game)
+- Dart 3.x / Flutter 3.x + flutter_riverpod, drift, sqlite3_flutter_libs, path_provider (014-spatial-span-nebula-map)
+- Drift (SQLite) for on-device persistence (014-spatial-span-nebula-map)
 
 - Flutter 3.x, Dart 3.x + `drift`, `sqlite3_flutter_libs`, `path_provider`, `path`, `drift_dev` (dev), `build_runner` (dev) (001-scaffold-local-storage)
 
@@ -41,9 +43,9 @@ tests/
 Flutter 3.x, Dart 3.x: Follow standard conventions
 
 ## Recent Changes
+- 014-spatial-span-nebula-map: Added Dart 3.x / Flutter 3.x + flutter_riverpod, drift, sqlite3_flutter_libs, path_provider
 - 013-spatial-span-game: Added Dart 3.x / Flutter 3.x + flutter_riverpod, just_audio, path_provider (standard stack)
 - 012-game-start-countdown: Added Dart 3.x / Flutter 3.x + flutter_riverpod, just_audio
-- 011-task-switching: Added Dart 3.x / Flutter 3.x + `flutter_riverpod`, `just_audio`, `drift`, `audio_session`
 
 
 <!-- MANUAL ADDITIONS START -->

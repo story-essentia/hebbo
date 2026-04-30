@@ -22,9 +22,8 @@ class _SpatialSpanScreenState extends ConsumerState<SpatialSpanScreen> {
   @override
   void initState() {
     super.initState();
-    Future.microtask(() {
-      ref.read(spatialSpanProvider.notifier).startSession();
-    });
+    // Removed startSession() call here so we don't overwrite the span/track
+    // that was passed from NebulaMapScreen.
   }
 
   @override
@@ -55,7 +54,7 @@ class _SpatialSpanScreenState extends ConsumerState<SpatialSpanScreen> {
               ],
             ),
           ),
-          
+
           // Pause Overlay
           if (state.isPaused) _buildPauseOverlay(),
 
@@ -95,7 +94,8 @@ class _SpatialSpanScreenState extends ConsumerState<SpatialSpanScreen> {
                   _buildOverlayButton(
                     label: 'Resume',
                     isPrimary: true,
-                    onPressed: () => ref.read(spatialSpanProvider.notifier).togglePause(),
+                    onPressed: () =>
+                        ref.read(spatialSpanProvider.notifier).togglePause(),
                   ),
                   const SizedBox(height: 16),
                   _buildOverlayButton(
@@ -124,14 +124,19 @@ class _SpatialSpanScreenState extends ConsumerState<SpatialSpanScreen> {
       onPressed: onPressed,
       style: ElevatedButton.styleFrom(
         backgroundColor: isPrimary ? AppColors.primary : AppColors.surface,
-        foregroundColor: isPrimary ? AppColors.background : AppColors.textPrimary,
+        foregroundColor: isPrimary
+            ? AppColors.background
+            : AppColors.textPrimary,
         padding: const EdgeInsets.symmetric(vertical: 20),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         elevation: 0,
       ),
       child: Text(
         label.toUpperCase(),
-        style: AppTextStyles.plusJakarta(fontWeight: FontWeight.w900, letterSpacing: 1.2),
+        style: AppTextStyles.plusJakarta(
+          fontWeight: FontWeight.w900,
+          letterSpacing: 1.2,
+        ),
       ),
     );
   }
@@ -170,7 +175,8 @@ class _SpatialSpanScreenState extends ConsumerState<SpatialSpanScreen> {
               color: AppColors.textPrimary.withOpacity(0.6),
               size: 28,
             ),
-            onPressed: () => ref.read(spatialSpanProvider.notifier).togglePause(),
+            onPressed: () =>
+                ref.read(spatialSpanProvider.notifier).togglePause(),
           ),
         ],
       ),
@@ -250,11 +256,16 @@ class _SpatialSpanScreenState extends ConsumerState<SpatialSpanScreen> {
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.surface,
               padding: const EdgeInsets.symmetric(horizontal: 48, vertical: 16),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+              ),
             ),
             child: Text(
               'CONTINUE',
-              style: AppTextStyles.plusJakarta(color: AppColors.primary, fontWeight: FontWeight.bold),
+              style: AppTextStyles.plusJakarta(
+                color: AppColors.primary,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
         ],

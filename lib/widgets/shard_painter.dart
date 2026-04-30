@@ -8,6 +8,7 @@ class ShardPainter extends CustomPainter {
   final double ringOpacity;
   final bool isHexagon; // true for hexagon, false for pentagon
   final bool isActive;
+  final bool isNoise;
 
   ShardPainter({
     required this.pulseScale,
@@ -15,6 +16,7 @@ class ShardPainter extends CustomPainter {
     required this.ringOpacity,
     this.isHexagon = true,
     this.isActive = false,
+    this.isNoise = false,
   });
 
   @override
@@ -24,38 +26,46 @@ class ShardPainter extends CustomPainter {
     final currentRadius = baseRadius * pulseScale;
 
     // Colors based on the screenshot
-    final mainColor = isActive ? AppColors.neonBlue : const Color(0xFF8A30FF); // Purple jewel
-    final glowColor = isActive ? AppColors.neonBlue : mainColor.withOpacity(0.4);
+    final highlightColor = isNoise ? AppColors.neonPink : AppColors.neonBlue;
+    final mainColor = isActive || isNoise
+        ? highlightColor
+        : const Color(0xFF8A30FF); // Purple jewel
+    final glowColor = isActive || isNoise
+        ? highlightColor
+        : mainColor.withOpacity(0.4);
 
     // 1. Draw the Outer Glow (Stronger & more layered)
     final glowPaint = Paint()
-      ..color = glowColor.withOpacity(isActive ? 0.6 : 0.3)
-      ..maskFilter = MaskFilter.blur(BlurStyle.outer, isActive ? 30 : 15);
-    
+      ..color = glowColor.withOpacity(isActive || isNoise ? 0.6 : 0.3)
+      ..maskFilter = MaskFilter.blur(
+        BlurStyle.outer,
+        isActive || isNoise ? 30 : 15,
+      );
+
     _drawPolygon(canvas, center, currentRadius, glowPaint);
 
     // 2. Face Bevel (Inner shadow)
     final innerRadius = currentRadius * 0.75;
-    
+
     // Draw the Bevel area (Sides)
     final sidePaint = Paint()
       ..shader = LinearGradient(
         begin: Alignment.topCenter,
         end: Alignment.bottomCenter,
         colors: [
-          mainColor.withOpacity(isActive ? 0.9 : 0.6),
-          mainColor.withOpacity(isActive ? 0.5 : 0.2),
+          mainColor.withOpacity(isActive || isNoise ? 0.9 : 0.6),
+          mainColor.withOpacity(isActive || isNoise ? 0.5 : 0.2),
         ],
       ).createShader(Rect.fromCircle(center: center, radius: currentRadius));
-    
+
     _drawPolygon(canvas, center, currentRadius, sidePaint);
 
     // 3. Draw Facet Lines
     final facetPaint = Paint()
-      ..color = Colors.white.withOpacity(isActive ? 0.4 : 0.1)
+      ..color = Colors.white.withOpacity(isActive || isNoise ? 0.4 : 0.1)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1.0;
-    
+
     _drawFacetLines(canvas, center, currentRadius, innerRadius, facetPaint);
 
     // 4. Draw the Top Face
@@ -64,8 +74,10 @@ class ShardPainter extends CustomPainter {
         begin: Alignment.topLeft,
         end: Alignment.bottomRight,
         colors: [
-          isActive ? Colors.white.withOpacity(0.9) : mainColor.withOpacity(0.8),
-          isActive ? AppColors.neonBlue : mainColor.withOpacity(0.3),
+          isActive || isNoise
+              ? Colors.white.withOpacity(0.9)
+              : mainColor.withOpacity(0.8),
+          isActive || isNoise ? highlightColor : mainColor.withOpacity(0.3),
         ],
       ).createShader(Rect.fromCircle(center: center, radius: innerRadius));
 
@@ -77,7 +89,7 @@ class ShardPainter extends CustomPainter {
         ..color = AppColors.neonBlue.withOpacity(ringOpacity)
         ..style = PaintingStyle.stroke
         ..strokeWidth = 2;
-      
+
       final expandedRingRadius = currentRadius * (1.2 + ringRadius * 0.8);
       _drawPolygon(canvas, center, expandedRingRadius, ringPaint);
     }
@@ -89,7 +101,13 @@ class ShardPainter extends CustomPainter {
     canvas.drawPath(path, paint);
   }
 
-  void _drawFacetLines(Canvas canvas, Offset center, double outerR, double innerR, Paint paint) {
+  void _drawFacetLines(
+    Canvas canvas,
+    Offset center,
+    double outerR,
+    double innerR,
+    Paint paint,
+  ) {
     final sides = isHexagon ? 6 : 5;
     final angle = (math.pi * 2) / sides;
     final startAngle = isHexagon ? 0.0 : -math.pi / 2;
@@ -113,13 +131,13 @@ class ShardPainter extends CustomPainter {
     final startAngle = isHexagon ? 0.0 : -math.pi / 2;
 
     for (int i = 0; i < sides; i++) {
-        final x = center.dx + radius * math.cos(startAngle + angle * i);
-        final y = center.dy + radius * math.sin(startAngle + angle * i);
-        if (i == 0) {
-            path.moveTo(x, y);
-        } else {
-            path.lineTo(x, y);
-        }
+      final x = center.dx + radius * math.cos(startAngle + angle * i);
+      final y = center.dy + radius * math.sin(startAngle + angle * i);
+      if (i == 0) {
+        path.moveTo(x, y);
+      } else {
+        path.lineTo(x, y);
+      }
     }
     path.close();
     return path;
@@ -130,6 +148,7 @@ class ShardPainter extends CustomPainter {
     return oldDelegate.pulseScale != pulseScale ||
         oldDelegate.ringRadius != ringRadius ||
         oldDelegate.ringOpacity != ringOpacity ||
-        oldDelegate.isActive != isActive;
+        oldDelegate.isActive != isActive ||
+        oldDelegate.isNoise != isNoise;
   }
 }
