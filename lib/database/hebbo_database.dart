@@ -5,6 +5,7 @@ import 'package:drift/native.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
 import 'package:hebbo/models/progress_models.dart';
+import 'package:hebbo/database/tables/spatial_span_progress.dart';
 
 part 'hebbo_database.g.dart';
 
@@ -43,12 +44,12 @@ class DifficultyStates extends Table {
   Set<Column> get primaryKey => {gameId};
 }
 
-@DriftDatabase(tables: [Trials, Sessions, DifficultyStates])
+@DriftDatabase(tables: [Trials, Sessions, DifficultyStates, SpatialSpanProgressTable])
 class HebboDatabase extends _$HebboDatabase {
   HebboDatabase() : super(_openConnection());
 
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -60,6 +61,9 @@ class HebboDatabase extends _$HebboDatabase {
             // Add columns for version 2
             await m.addColumn(sessions, sessions.gameId);
             await m.addColumn(trials, trials.metadata);
+          }
+          if (from < 3) {
+            await m.createTable(spatialSpanProgressTable);
           }
         },
       );
@@ -95,6 +99,40 @@ class HebboDatabase extends _$HebboDatabase {
       ..limit(1);
     final result = await query.getSingleOrNull();
     return result?.environmentTier;
+  }
+
+  // --- Spatial Span Progress Queries ---
+
+  Future<SpatialSpanProgress?> getSpatialSpanProgress(int trackId) async {
+    return (select(spatialSpanProgressTable)..where((t) => t.trackId.equals(trackId))).getSingleOrNull();
+  }
+
+  Future<void> updateSpatialSpanProgress(int trackId, int newSpan) async {
+    final existing = await getSpatialSpanProgress(trackId);
+    
+    if (existing == null) {
+      await into(spatialSpanProgressTable).insert(
+        SpatialSpanProgressTableCompanion.insert(
+          trackId: trackId,
+          maxSpanReached: Value(newSpan),
+          lastPlayedAt: Value(DateTime.now()),
+        ),
+      );
+    } else if (newSpan > existing.maxSpanReached) {
+      await (update(spatialSpanProgressTable)..where((t) => t.id.equals(existing.id))).write(
+        SpatialSpanProgressTableCompanion(
+          maxSpanReached: Value(newSpan),
+          lastPlayedAt: Value(DateTime.now()),
+        ),
+      );
+    } else {
+      // Just update lastPlayedAt
+      await (update(spatialSpanProgressTable)..where((t) => t.id.equals(existing.id))).write(
+        SpatialSpanProgressTableCompanion(
+          lastPlayedAt: Value(DateTime.now()),
+        ),
+      );
+    }
   }
 
   Future<List<SessionChartData>> getSessionChartData(String gameId) async {

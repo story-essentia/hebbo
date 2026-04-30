@@ -35,6 +35,8 @@ class SpatialSpanGrid extends ConsumerWidget {
               child: ShardWidget(
                 key: ValueKey('shard_$i'),
                 isActive: state.activeShardIndex == i,
+                isNoise: state.noiseShardIndex == i,
+                noiseScale: state.noiseScale,
                 isHexagon: i % 2 == 0, // Alternate shapes for visual variety
                 onTap: () => ref.read(spatialSpanProvider.notifier).handleShardTap(i),
               ),

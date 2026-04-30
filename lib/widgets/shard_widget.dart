@@ -5,19 +5,24 @@ class ShardWidget extends StatefulWidget {
   final bool isActive;
   final VoidCallback? onTap;
   final bool isHexagon;
+  final bool isNoise;
+  final double noiseScale;
 
   const ShardWidget({
     super.key,
     this.isActive = false,
     this.onTap,
     this.isHexagon = true,
+    this.isNoise = false,
+    this.noiseScale = 1.0,
   });
 
   @override
   State<ShardWidget> createState() => ShardWidgetState();
 }
 
-class ShardWidgetState extends State<ShardWidget> with TickerProviderStateMixin {
+class ShardWidgetState extends State<ShardWidget>
+    with TickerProviderStateMixin {
   late AnimationController _pulseController;
   late AnimationController _ringController;
   late Animation<double> _pulseScale;
@@ -41,9 +46,10 @@ class ShardWidgetState extends State<ShardWidget> with TickerProviderStateMixin 
       CurvedAnimation(parent: _pulseController, curve: Curves.easeOutCubic),
     );
 
-    _ringRadius = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _ringController, curve: Curves.easeOut),
-    );
+    _ringRadius = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(parent: _ringController, curve: Curves.easeOut));
 
     _ringOpacity = TweenSequence<double>([
       TweenSequenceItem(tween: Tween<double>(begin: 0.0, end: 0.8), weight: 20),
@@ -57,11 +63,21 @@ class ShardWidgetState extends State<ShardWidget> with TickerProviderStateMixin 
     _ringController.forward(from: 0.0);
   }
 
+  void noisePulse() {
+    if (!mounted) return;
+    // Just pulse the scale, no ring
+    _pulseController.forward().then((_) => _pulseController.reverse());
+  }
+
   @override
   void didUpdateWidget(ShardWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.isActive && !oldWidget.isActive) {
       pulse();
+    }
+
+    if (widget.isNoise && !oldWidget.isNoise) {
+      noisePulse();
     }
   }
 
@@ -91,6 +107,7 @@ class ShardWidgetState extends State<ShardWidget> with TickerProviderStateMixin 
                 ringOpacity: _ringOpacity.value,
                 isHexagon: widget.isHexagon,
                 isActive: widget.isActive,
+                isNoise: widget.isNoise,
               ),
             );
           },
