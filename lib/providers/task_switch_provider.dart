@@ -159,9 +159,9 @@ class TaskSwitchGameNotifier extends StateNotifier<TaskSwitchState> {
 
     // Trigger audio feedback
     if (isCorrect) {
-      unawaited(_ref.read(gameAudioProvider).playCorrectTap());
+      unawaited(_ref.read(gameAudioProvider).playTaskSwitchCorrectTap());
     } else {
-      unawaited(_ref.read(gameAudioProvider).playWrongTap());
+      unawaited(_ref.read(gameAudioProvider).playTaskSwitchWrongTap());
     }
 
     // 200ms feedback, then next trial

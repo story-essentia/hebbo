@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:math' as math;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hebbo/state/spatial_span_state.dart';
-
+import 'package:hebbo/providers/audio_provider.dart';
 import 'package:hebbo/providers/spatial_span_progress_provider.dart';
 
 final spatialSpanProvider =
@@ -21,9 +21,9 @@ class SpatialSpanNotifier extends StateNotifier<SpatialSpanState> {
   final math.Random _random = math.Random();
 
   void startSession({int trackId = 1, int startingSpan = 3}) {
-    // Generate 9 random positions in a 4x4 grid (0-15)
+    // Generate 10 random positions in a 4x4 grid (0-15)
     final allPositions = List.generate(16, (i) => i)..shuffle();
-    final shardPositions = allPositions.take(9).toList();
+    final shardPositions = allPositions.take(10).toList();
 
     state = SpatialSpanState(
       trackId: trackId,
@@ -82,7 +82,7 @@ class SpatialSpanNotifier extends StateNotifier<SpatialSpanState> {
   }
 
   List<int> _generateSequence(int length) {
-    final list = List.generate(9, (i) => i)..shuffle();
+    final list = List.generate(10, (i) => i)..shuffle();
     return list.take(length).toList();
   }
 
@@ -113,6 +113,9 @@ class SpatialSpanNotifier extends StateNotifier<SpatialSpanState> {
       // Step 1: Light up the shard
       final shardIdx = state.currentSequence[_currentDemoIndex];
       state = state.copyWith(activeShardIndex: shardIdx);
+      
+      // Play flash sound
+      _ref.read(gameAudioProvider).playSpatialSpanFlash();
 
       // Step 2: Turn it off after 800ms so there is a visual gap
       Future.delayed(const Duration(milliseconds: 800), () {
@@ -170,17 +173,19 @@ class SpatialSpanNotifier extends StateNotifier<SpatialSpanState> {
     final newUserSequence = [...state.userSequence, index];
 
     if (index == nextExpectedIndex) {
+      _ref.read(gameAudioProvider).playSpatialSpanCorrectTap();
       state = state.copyWith(userSequence: newUserSequence);
 
       if (newUserSequence.length == state.currentSequence.length) {
-        _handleTrialResult(true);
+        _handleTrialResult(true, index);
       }
     } else {
-      _handleTrialResult(false);
+      _ref.read(gameAudioProvider).playSpatialSpanWrongTap();
+      _handleTrialResult(false, index);
     }
   }
 
-  void _handleTrialResult(bool success) {
+  void _handleTrialResult(bool success, int tappedIndex) {
     final newSuccesses = state.successesInLevel + (success ? 1 : 0);
     final newTrials = state.trialsInLevel + 1;
 
@@ -189,6 +194,8 @@ class SpatialSpanNotifier extends StateNotifier<SpatialSpanState> {
       feedbackState: success ? FeedbackType.success : FeedbackType.fail,
       successesInLevel: newSuccesses,
       trialsInLevel: newTrials,
+      // Temporarily store the wrong index in activeShardIndex for the shake animation
+      activeShardIndex: success ? null : tappedIndex, 
     );
 
     Future.delayed(const Duration(milliseconds: 1000), () {
@@ -196,7 +203,7 @@ class SpatialSpanNotifier extends StateNotifier<SpatialSpanState> {
 
       if (newSuccesses == 2) {
         // Level up
-        final nextSpan = state.span + 1;
+        final nextSpan = math.min(10, state.span + 1);
 
         // Save progression to DB
         _ref
@@ -210,8 +217,15 @@ class SpatialSpanNotifier extends StateNotifier<SpatialSpanState> {
         );
         _startNextTrial();
       } else if (newTrials - newSuccesses == 2) {
-        // Fail level / end session (Simplified for Milestone 1)
-        state = state.copyWith(phase: GamePhase.complete);
+        // Level down instead of completing
+        final prevSpan = math.max(3, state.span - 1);
+        
+        state = state.copyWith(
+          span: prevSpan,
+          successesInLevel: 0,
+          trialsInLevel: 0,
+        );
+        _startNextTrial();
       } else {
         // Try again at same span
         _startNextTrial();

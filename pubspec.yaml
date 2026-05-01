@@ -83,11 +83,10 @@ flutter:
 
   # To add assets to your application, add an assets section, like this:
   assets:
-    - assets/sounds/underwater-ambience.mp3
-    - assets/sounds/level-up.mp3
-    - assets/sounds/session-complete.mp3
-    - assets/sounds/correct_tap.mp3
-    - assets/sounds/wrong_tap.mp3
+    - assets/sounds/
+    - assets/sounds/spatial_span_sounds/
+    - assets/sounds/task_switching_sounds/
+    - assets/sounds/flanker_sounds/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

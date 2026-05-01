@@ -193,7 +193,7 @@ class _SpatialSpanScreenState extends ConsumerState<SpatialSpanScreen> {
         color = AppColors.neonBlue;
         break;
       case GamePhase.recall:
-        message = 'REPEAT SEQUENCE';
+        message = state.trackId == 3 ? 'REVERSE SEQUENCE' : 'REPEAT SEQUENCE';
         color = AppColors.neonPink;
         break;
       case GamePhase.feedback:

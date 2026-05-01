@@ -2,6 +2,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hebbo/providers/spatial_span_provider.dart';
+import 'package:hebbo/state/spatial_span_state.dart';
 import 'package:hebbo/widgets/shard_widget.dart';
 
 class SpatialSpanGrid extends ConsumerWidget {
@@ -36,6 +37,7 @@ class SpatialSpanGrid extends ConsumerWidget {
                 key: ValueKey('shard_$i'),
                 isActive: state.activeShardIndex == i,
                 isNoise: state.noiseShardIndex == i,
+                isWrong: state.feedbackState == FeedbackType.fail && state.activeShardIndex == i,
                 noiseScale: state.noiseScale,
                 trackId: state.trackId,
                 isHexagon: i % 2 == 0, // Alternate shapes for visual variety
