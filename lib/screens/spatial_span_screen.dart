@@ -23,7 +23,7 @@ class _SpatialSpanScreenState extends ConsumerState<SpatialSpanScreen> {
   void initState() {
     super.initState();
     // Removed startSession() call here so we don't overwrite the span/track
-    // that was passed from NebulaMapScreen.
+    // that was passed from ProgressionMapScreen.
   }
 
   @override

@@ -9,6 +9,7 @@ class ShardPainter extends CustomPainter {
   final bool isHexagon; // true for hexagon, false for pentagon
   final bool isActive;
   final bool isNoise;
+  final int trackId;
 
   ShardPainter({
     required this.pulseScale,
@@ -17,6 +18,7 @@ class ShardPainter extends CustomPainter {
     this.isHexagon = true,
     this.isActive = false,
     this.isNoise = false,
+    this.trackId = 1,
   });
 
   @override
@@ -25,11 +27,18 @@ class ShardPainter extends CustomPainter {
     final baseRadius = math.min(size.width, size.height) / 2.5;
     final currentRadius = baseRadius * pulseScale;
 
-    // Colors based on the screenshot
-    final highlightColor = isNoise ? AppColors.neonPink : AppColors.neonBlue;
-    final mainColor = isActive || isNoise
-        ? highlightColor
-        : const Color(0xFF8A30FF); // Purple jewel
+    // Colors based on the screenshot and track
+    final Color highlightColor;
+    if (isNoise) {
+        highlightColor = AppColors.neonPink;
+    } else if (trackId == 3) {
+        highlightColor = AppColors.neonLime;
+    } else {
+        // Track 1 and Track 2 both use Neon Blue for the main sequence
+        highlightColor = AppColors.neonBlue;
+    }
+    
+    final mainColor = isActive || isNoise ? highlightColor : const Color(0xFF8A30FF); // Purple jewel
     final glowColor = isActive || isNoise
         ? highlightColor
         : mainColor.withOpacity(0.4);
@@ -86,7 +95,7 @@ class ShardPainter extends CustomPainter {
     // 5. Draw the Pulse Ring
     if (ringOpacity > 0) {
       final ringPaint = Paint()
-        ..color = AppColors.neonBlue.withOpacity(ringOpacity)
+        ..color = highlightColor.withOpacity(ringOpacity)
         ..style = PaintingStyle.stroke
         ..strokeWidth = 2;
 
@@ -149,6 +158,7 @@ class ShardPainter extends CustomPainter {
         oldDelegate.ringRadius != ringRadius ||
         oldDelegate.ringOpacity != ringOpacity ||
         oldDelegate.isActive != isActive ||
-        oldDelegate.isNoise != isNoise;
+        oldDelegate.isNoise != isNoise ||
+        oldDelegate.trackId != trackId;
   }
 }

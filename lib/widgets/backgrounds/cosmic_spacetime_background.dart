@@ -22,16 +22,7 @@ class _CosmicPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final center = Offset(size.width / 2, size.height * 0.4);
     
-    // 1. Draw Star Trails (Concentric Rings)
-    final ringPaint = Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 0.5;
-
-    for (int i = 1; i <= 5; i++) {
-      final radius = 100.0 * i;
-      ringPaint.color = Colors.white.withOpacity(0.05 / i);
-      canvas.drawCircle(center, radius, ringPaint);
-    }
+    // Removed Star Trails (Concentric Rings) to clean up the center screen artifact
 
     // 2. Draw Subtle Star Noise
     final starPaint = Paint()..color = Colors.white.withOpacity(0.2);

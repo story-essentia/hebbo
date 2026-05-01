@@ -18,10 +18,10 @@ class ConstellationNode {
   });
 }
 
-class NebulaMapPainter extends CustomPainter {
+class ProgressionMapPainter extends CustomPainter {
   final List<ConstellationNode> nodes;
 
-  NebulaMapPainter({required this.nodes});
+  ProgressionMapPainter({required this.nodes});
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -37,25 +37,24 @@ class NebulaMapPainter extends CustomPainter {
     final track2Nodes = nodes.where((n) => n.track == 2).toList()
       ..sort((a, b) => a.span.compareTo(b.span));
 
+    final track3Nodes = nodes.where((n) => n.track == 3).toList()
+      ..sort((a, b) => a.span.compareTo(b.span));
+
     _drawLines(canvas, track1Nodes, AppColors.neonBlue);
-
-    // Connect Track 1 Span 7 to Track 2 Span 7 if it exists
-    final t1Span7 = track1Nodes.where((n) => n.span == 7).firstOrNull;
-    final t2Span7 = track2Nodes.where((n) => n.span == 7).firstOrNull;
-
-    if (t1Span7 != null && t2Span7 != null) {
-      final connectionPaint = Paint()
-        ..color = AppColors.neonPink.withOpacity(t2Span7.isUnlocked ? 0.6 : 0.1)
-        ..strokeWidth = 2.0
-        ..style = PaintingStyle.stroke;
-      canvas.drawLine(t1Span7.position, t2Span7.position, connectionPaint);
-    }
-
     _drawLines(canvas, track2Nodes, AppColors.neonPink);
+    _drawLines(canvas, track3Nodes, AppColors.neonLime);
 
     // 2. Draw nodes
     for (final node in nodes) {
-      final color = node.track == 1 ? AppColors.neonBlue : AppColors.neonPink;
+      Color color;
+      if (node.track == 1) {
+          color = AppColors.neonBlue;
+      } else if (node.track == 2) {
+          color = AppColors.neonPink;
+      } else {
+          color = AppColors.neonLime;
+      }
+      
       final opacity = node.isUnlocked ? 1.0 : 0.2;
 
       // Node core
@@ -120,7 +119,7 @@ class NebulaMapPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant NebulaMapPainter oldDelegate) {
+  bool shouldRepaint(covariant ProgressionMapPainter oldDelegate) {
     return oldDelegate.nodes != nodes;
   }
 }

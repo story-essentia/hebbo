@@ -7,6 +7,7 @@ class ShardWidget extends StatefulWidget {
   final bool isHexagon;
   final bool isNoise;
   final double noiseScale;
+  final int trackId;
 
   const ShardWidget({
     super.key,
@@ -15,6 +16,7 @@ class ShardWidget extends StatefulWidget {
     this.isHexagon = true,
     this.isNoise = false,
     this.noiseScale = 1.0,
+    this.trackId = 1,
   });
 
   @override
@@ -108,6 +110,7 @@ class ShardWidgetState extends State<ShardWidget>
                 isHexagon: widget.isHexagon,
                 isActive: widget.isActive,
                 isNoise: widget.isNoise,
+                trackId: widget.trackId,
               ),
             );
           },

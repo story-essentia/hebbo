@@ -6,22 +6,24 @@ import 'package:hebbo/providers/spatial_span_provider.dart';
 import 'package:hebbo/screens/spatial_span_screen.dart';
 import 'package:hebbo/theme/app_theme.dart';
 import 'package:hebbo/widgets/backgrounds/cosmic_spacetime_background.dart';
-import 'package:hebbo/widgets/backgrounds/nebula_map_painter.dart';
+import 'package:hebbo/widgets/backgrounds/progression_map_painter.dart';
+import 'package:hebbo/widgets/spatial_span_tutorial_sheet.dart';
 
-class NebulaMapScreen extends ConsumerStatefulWidget {
-  const NebulaMapScreen({super.key});
+class ProgressionMapScreen extends ConsumerStatefulWidget {
+  const ProgressionMapScreen({super.key});
 
   @override
-  ConsumerState<NebulaMapScreen> createState() => _NebulaMapScreenState();
+  ConsumerState<ProgressionMapScreen> createState() => _ProgressionMapScreenState();
 }
 
-class _NebulaMapScreenState extends ConsumerState<NebulaMapScreen> {
+class _ProgressionMapScreenState extends ConsumerState<ProgressionMapScreen> {
   final TransformationController _transformationController =
       TransformationController();
 
   List<ConstellationNode> _generateNodes(
     int track1Max,
     int track2Max,
+    int track3Max,
     Size screenSize,
   ) {
     final List<ConstellationNode> nodes = [];
@@ -32,8 +34,8 @@ class _NebulaMapScreenState extends ConsumerState<NebulaMapScreen> {
     final startY = screenSize.height - 100.0; // Bottom
 
     final colSpacing = 80.0;
-    // We only have 2 columns right now. We can center them.
-    final startX = (screenSize.width - colSpacing) / 2;
+    // We now have 3 columns. Center them.
+    final startX = (screenSize.width - (colSpacing * 2)) / 2;
 
     // Track 1 (Main Trunk)
     for (int span = 3; span <= 10; span++) {
@@ -68,6 +70,28 @@ class _NebulaMapScreenState extends ConsumerState<NebulaMapScreen> {
           ConstellationNode(
             span: span,
             track: 2,
+            isUnlocked: isUnlocked,
+            position: Offset(offsetX, offsetY),
+          ),
+        );
+      }
+    }
+    
+    // Track 3 (Third Column) - unlocks if Track 2 reached span 7
+    final bool track3Visible = track2Max >= 7;
+
+    if (track3Visible) {
+      for (int span = 3; span <= 10; span++) {
+        // Node 3 is inherently unlocked when Track 3 becomes visible
+        final isUnlocked = span <= math.max(3, track3Max);
+
+        final offsetX = startX + (colSpacing * 2);
+        final offsetY = startY - ((span - 3) * spacingY);
+
+        nodes.add(
+          ConstellationNode(
+            span: span,
+            track: 3,
             isUnlocked: isUnlocked,
             position: Offset(offsetX, offsetY),
           ),
@@ -121,6 +145,7 @@ class _NebulaMapScreenState extends ConsumerState<NebulaMapScreen> {
     final nodes = _generateNodes(
       progressState.track1MaxSpan,
       progressState.track2MaxSpan,
+      progressState.track3MaxSpan,
       size,
     );
 
@@ -148,7 +173,7 @@ class _NebulaMapScreenState extends ConsumerState<NebulaMapScreen> {
                 }
               },
               child: SizedBox.expand(
-                child: CustomPaint(painter: NebulaMapPainter(nodes: nodes)),
+                child: CustomPaint(painter: ProgressionMapPainter(nodes: nodes)),
               ),
             ),
           ),
@@ -167,14 +192,25 @@ class _NebulaMapScreenState extends ConsumerState<NebulaMapScreen> {
                     onPressed: () => Navigator.pop(context),
                   ),
                   const SizedBox(width: 16),
-                  Text(
-                    'NEBULA MAP',
-                    style: AppTextStyles.plusJakarta(
-                      color: AppColors.textPrimary,
-                      fontSize: 24,
-                      fontWeight: FontWeight.w900,
-                      letterSpacing: 2,
+                  Expanded(
+                    child: Text(
+                      'Progression Map',
+                      style: AppTextStyles.plusJakarta(
+                        color: AppColors.textPrimary,
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 1,
+                      ),
+                      overflow: TextOverflow.ellipsis,
                     ),
+                  ),
+                  IconButton(
+                    icon: const Icon(
+                      Icons.help_outline,
+                      color: AppColors.textPrimary,
+                      size: 28,
+                    ),
+                    onPressed: () => SpatialSpanTutorialSheet.show(context),
                   ),
                 ],
               ),
