@@ -37,6 +37,7 @@ class SpatialSpanGrid extends ConsumerWidget {
                 isActive: state.activeShardIndex == i,
                 isNoise: state.noiseShardIndex == i,
                 noiseScale: state.noiseScale,
+                trackId: state.trackId,
                 isHexagon: i % 2 == 0, // Alternate shapes for visual variety
                 onTap: () => ref.read(spatialSpanProvider.notifier).handleShardTap(i),
               ),

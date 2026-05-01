@@ -101,10 +101,11 @@ class SpatialSpanNotifier extends StateNotifier<SpatialSpanState> {
       if (_currentDemoIndex >= state.currentSequence.length) {
         timer.cancel();
         _noiseTimer?.cancel();
+        
         state = state.copyWith(
-          phase: GamePhase.recall,
-          activeShardIndex: null,
-          noiseShardIndex: null,
+            phase: GamePhase.recall,
+            activeShardIndex: null,
+            noiseShardIndex: null,
         );
         return;
       }
@@ -160,7 +161,12 @@ class SpatialSpanNotifier extends StateNotifier<SpatialSpanState> {
   void handleShardTap(int index) {
     if (state.phase != GamePhase.recall || state.isPaused) return;
 
-    final nextExpectedIndex = state.currentSequence[state.userSequence.length];
+    final isReversed = state.trackId == 3;
+    final targetIndexInSequence = isReversed
+        ? state.currentSequence.length - 1 - state.userSequence.length
+        : state.userSequence.length;
+        
+    final nextExpectedIndex = state.currentSequence[targetIndexInSequence];
     final newUserSequence = [...state.userSequence, index];
 
     if (index == nextExpectedIndex) {

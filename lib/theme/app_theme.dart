@@ -7,6 +7,7 @@ class AppColors {
   static const textPrimary = Color(0xFFEFDFFF);
   static const neonBlue = Color(0xFF00F0FF);
   static const neonPink = Color(0xFFFF8AA7);
+  static const neonLime = Color(0xFFCCFF00);
 }
 
 class AppTextStyles {
