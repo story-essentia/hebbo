@@ -58,45 +58,41 @@ class _ProgressionMapScreenState extends ConsumerState<ProgressionMapScreen> {
     // Track 2 (Second Column) - unlocks if Track 1 reached span 7
     final bool track2Visible = track1Max >= 7;
 
-    if (track2Visible) {
-      for (int span = 3; span <= 10; span++) {
-        // Node 3 is inherently unlocked when Track 2 becomes visible
-        final isUnlocked = span <= math.max(3, track2Max);
+    for (int span = 3; span <= 10; span++) {
+      // Node 3 is inherently unlocked when Track 2 becomes visible
+      final isUnlocked = track2Visible && span <= math.max(3, track2Max);
 
-        final offsetX = startX + colSpacing;
-        final offsetY = startY - ((span - 3) * spacingY);
+      final offsetX = startX + colSpacing;
+      final offsetY = startY - ((span - 3) * spacingY);
 
-        nodes.add(
-          ConstellationNode(
-            span: span,
-            track: 2,
-            isUnlocked: isUnlocked,
-            position: Offset(offsetX, offsetY),
-          ),
-        );
-      }
+      nodes.add(
+        ConstellationNode(
+          span: span,
+          track: 2,
+          isUnlocked: isUnlocked,
+          position: Offset(offsetX, offsetY),
+        ),
+      );
     }
     
     // Track 3 (Third Column) - unlocks if Track 2 reached span 7
     final bool track3Visible = track2Max >= 7;
 
-    if (track3Visible) {
-      for (int span = 3; span <= 10; span++) {
-        // Node 3 is inherently unlocked when Track 3 becomes visible
-        final isUnlocked = span <= math.max(3, track3Max);
+    for (int span = 3; span <= 10; span++) {
+      // Node 3 is inherently unlocked when Track 3 becomes visible
+      final isUnlocked = track3Visible && span <= math.max(3, track3Max);
 
-        final offsetX = startX + (colSpacing * 2);
-        final offsetY = startY - ((span - 3) * spacingY);
+      final offsetX = startX + (colSpacing * 2);
+      final offsetY = startY - ((span - 3) * spacingY);
 
-        nodes.add(
-          ConstellationNode(
-            span: span,
-            track: 3,
-            isUnlocked: isUnlocked,
-            position: Offset(offsetX, offsetY),
-          ),
-        );
-      }
+      nodes.add(
+        ConstellationNode(
+          span: span,
+          track: 3,
+          isUnlocked: isUnlocked,
+          position: Offset(offsetX, offsetY),
+        ),
+      );
     }
 
     return nodes;

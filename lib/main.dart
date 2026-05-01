@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'database/hebbo_database.dart';
 import 'providers/adaptive_engine_provider.dart';
@@ -14,6 +15,11 @@ import 'package:hebbo/theme/app_theme.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  
+  await SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+    DeviceOrientation.portraitDown,
+  ]);
   
   final database = HebboDatabase();
   final trialRepo = DriftTrialRepository(database);

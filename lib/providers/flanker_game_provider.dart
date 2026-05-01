@@ -159,9 +159,9 @@ class FlankerGameNotifier extends StateNotifier<FlankerSessionState> {
 
     // Play feedback sound
     if (isCorrect) {
-      _ref.read(gameAudioProvider).playCorrectTap();
+      _ref.read(gameAudioProvider).playFlankerCorrectTap();
     } else {
-      _ref.read(gameAudioProvider).playWrongTap();
+      _ref.read(gameAudioProvider).playFlankerWrongTap();
     }
 
     _adaptiveEngine.reportTrial(isCorrect, reactionTime);
@@ -212,7 +212,7 @@ class FlankerGameNotifier extends StateNotifier<FlankerSessionState> {
     final stimulus = state.currentStimulus;
 
     // Trigger wrong tap sound for timeout
-    _ref.read(gameAudioProvider).playWrongTap();
+    _ref.read(gameAudioProvider).playFlankerWrongTap();
 
     _adaptiveEngine.reportTrial(false, reactionTime);
     final nextLevel = _adaptiveEngine.state.currentLevel;
