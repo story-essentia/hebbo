@@ -46,9 +46,6 @@ class GameAudioNotifier {
       }
     }
 
-    await load(_correctPlayer, 'assets/sounds/correct_tap.mp3', 0.4);
-    await load(_wrongPlayer, 'assets/sounds/wrong_tap.mp3', 0.4);
-    
     await load(_ssCorrectPlayer, 'assets/sounds/spatial_span_sounds/correct_tap.ogg', 0.5);
     await load(_ssWrongPlayer, 'assets/sounds/spatial_span_sounds/incorrect_tap.mp3', 0.5);
     await load(_ssFlashPlayer, 'assets/sounds/spatial_span_sounds/shard_activation.ogg', 0.5);
@@ -113,7 +110,7 @@ class GameAudioNotifier {
   Future<void> playLevelUp() async {
     await _ensureInitialized();
     try {
-      await _sfxPlayer.setAsset('assets/sounds/level-up.mp3');
+      await _sfxPlayer.setAsset('assets/sounds/level_up.wav');
       await _sfxPlayer.setVolume(0.4);
       unawaited(_sfxPlayer.play());
     } catch (e) {
@@ -124,7 +121,7 @@ class GameAudioNotifier {
   Future<void> playSessionComplete() async {
     await _ensureInitialized();
     try {
-      await _sfxPlayer.setAsset('assets/sounds/session-complete.mp3');
+      await _sfxPlayer.setAsset('assets/sounds/session_completed.wav');
       await _sfxPlayer.setVolume(0.6);
       unawaited(_sfxPlayer.play());
     } catch (e) {

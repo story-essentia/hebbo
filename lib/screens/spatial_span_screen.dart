@@ -22,8 +22,15 @@ class _SpatialSpanScreenState extends ConsumerState<SpatialSpanScreen> {
   @override
   void initState() {
     super.initState();
-    // Removed startSession() call here so we don't overwrite the span/track
-    // that was passed from ProgressionMapScreen.
+    Future.microtask(() {
+      ref.read(gameAudioProvider).startSessionAmbience();
+    });
+  }
+
+  @override
+  void dispose() {
+    ref.read(gameAudioProvider).stopSessionAudio();
+    super.dispose();
   }
 
   @override
@@ -160,7 +167,7 @@ class _SpatialSpanScreenState extends ConsumerState<SpatialSpanScreen> {
                 ),
               ),
               Text(
-                'TRIAL ${state.trialsInLevel + 1}/3',
+                'TRIAL ${state.trialsInLevel >= 3 ? 3 : state.trialsInLevel + 1}/3',
                 style: AppTextStyles.plusJakarta(
                   color: AppColors.textPrimary.withOpacity(0.5),
                   fontSize: 12,

@@ -205,6 +205,9 @@ class SpatialSpanNotifier extends StateNotifier<SpatialSpanState> {
         // Level up
         final nextSpan = math.min(10, state.span + 1);
 
+        // Play level up sound
+        _ref.read(gameAudioProvider).playLevelUp();
+
         // Save progression to DB
         _ref
             .read(spatialSpanProgressProvider.notifier)
