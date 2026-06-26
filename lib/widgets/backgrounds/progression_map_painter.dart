@@ -1,4 +1,3 @@
-import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:hebbo/theme/app_theme.dart';
 
@@ -25,12 +24,6 @@ class ProgressionMapPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    // 1. Draw connecting lines
-    final linePaint = Paint()
-      ..color = AppColors.neonBlue.withOpacity(0.3)
-      ..strokeWidth = 2.0
-      ..style = PaintingStyle.stroke;
-
     final track1Nodes = nodes.where((n) => n.track == 1).toList()
       ..sort((a, b) => a.span.compareTo(b.span));
 

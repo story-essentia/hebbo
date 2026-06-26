@@ -56,6 +56,7 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   mocktail: ^1.0.3
+  flutter_launcher_icons: ^0.13.1
 
   integration_test:
     sdk: flutter
@@ -109,3 +110,10 @@ flutter:
           weight: 700
         - asset: assets/fonts/PlusJakartaSans-ExtraBold.ttf
           weight: 800
+
+flutter_launcher_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "assets/files/icon_preview_1024.png"
+  adaptive_icon_background: "assets/files/background_1024.png"
+  adaptive_icon_foreground: "assets/files/foreground_1024.png"

@@ -7,8 +7,6 @@ import 'package:hebbo/theme/app_theme.dart';
 import 'package:hebbo/providers/audio_provider.dart';
 import 'package:hebbo/widgets/game_countdown_overlay.dart';
 import 'package:hebbo/widgets/spatial_span_grid.dart';
-import 'package:hebbo/widgets/backgrounds/animated_background_wrapper.dart';
-import 'package:hebbo/widgets/backgrounds/environment_transitioner.dart';
 import 'package:hebbo/widgets/backgrounds/cosmic_spacetime_background.dart';
 
 class SpatialSpanScreen extends ConsumerStatefulWidget {

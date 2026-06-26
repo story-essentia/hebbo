@@ -7,10 +7,8 @@ import 'package:hebbo/providers/flanker_game_provider.dart';
 import 'package:hebbo/screens/session_end_placeholder.dart';
 import 'package:hebbo/providers/adaptive_engine_provider.dart';
 import 'package:hebbo/widgets/fish_row_widget.dart';
-import 'package:hebbo/widgets/backgrounds/environment_factory.dart';
 import 'package:hebbo/widgets/backgrounds/animated_background_wrapper.dart';
 import 'package:hebbo/widgets/backgrounds/environment_transitioner.dart';
-import 'package:hebbo/providers/notification_provider.dart';
 import 'package:hebbo/providers/audio_provider.dart';
 import 'package:hebbo/widgets/game_countdown_overlay.dart';
 

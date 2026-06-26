@@ -6,7 +6,6 @@ import 'package:hebbo/providers/task_switch_provider.dart';
 import 'package:hebbo/screens/session_end_placeholder.dart';
 import 'package:hebbo/providers/adaptive_engine_provider.dart';
 import 'package:hebbo/providers/audio_provider.dart';
-import 'package:hebbo/state/task_switch_state.dart';
 import 'package:hebbo/widgets/neon_orb_widget.dart';
 import 'package:hebbo/widgets/particle_background.dart';
 import 'package:hebbo/widgets/game_countdown_overlay.dart';
@@ -45,7 +44,6 @@ class _TaskSwitchScreenState extends ConsumerState<TaskSwitchScreen> {
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(taskSwitchGameProvider);
-    final level = ref.watch(adaptiveEngineProvider).currentLevel;
 
     ref.listen(taskSwitchGameProvider.select((s) => s.isSessionComplete), (previous, next) {
       if (next) {

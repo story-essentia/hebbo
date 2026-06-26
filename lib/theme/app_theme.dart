@@ -45,7 +45,6 @@ class AppTheme {
     ).copyWith(
       primary: AppColors.primary,
       surface: AppColors.surface,
-      background: AppColors.background,
     ),
     scaffoldBackgroundColor: AppColors.background,
     textTheme: const TextTheme(
