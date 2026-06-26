@@ -80,12 +80,6 @@ class FlankerGameNotifier extends StateNotifier<FlankerSessionState> {
   /// Duration of correct/wrong feedback flash (ms)
   static const _feedbackDurationMs = 200;
 
-  /// Duration of the top-down "reset" phase between trials (ms).
-  static const _resetDurationMs = 500;
-
-  /// Duration of the initial pre-trial top-down hold (ms)
-  static const _preTrialHoldMs = 800;
-
   void startSession(int initialLevel) {
     _sessionStartTime = DateTime.now();
     _initialLevel = initialLevel;

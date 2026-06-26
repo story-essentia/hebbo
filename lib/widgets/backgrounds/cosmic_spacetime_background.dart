@@ -20,8 +20,6 @@ class CosmicSpacetimeBackground extends StatelessWidget {
 class _CosmicPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
-    final center = Offset(size.width / 2, size.height * 0.4);
-    
     // Removed Star Trails (Concentric Rings) to clean up the center screen artifact
 
     // 2. Draw Subtle Star Noise

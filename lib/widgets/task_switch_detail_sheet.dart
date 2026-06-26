@@ -6,7 +6,6 @@ import 'package:hebbo/screens/task_switch_screen.dart';
 import 'package:hebbo/screens/progress_screen.dart';
 import 'package:hebbo/widgets/stat_chip.dart';
 import 'package:hebbo/widgets/stat_chip_skeleton.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:hebbo/widgets/task_switch_tutorial_sheet.dart';
 import 'package:hebbo/providers/database_provider.dart';
 

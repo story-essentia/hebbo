@@ -9,7 +9,6 @@ import 'package:hebbo/widgets/stat_chip_skeleton.dart';
 
 import 'package:hebbo/widgets/flanker_tutorial_sheet.dart';
 import 'package:hebbo/providers/database_provider.dart';
-import 'package:hebbo/widgets/task_switch_tutorial_sheet.dart';
 
 class FlankerDetailSheet extends ConsumerWidget {
   const FlankerDetailSheet({
